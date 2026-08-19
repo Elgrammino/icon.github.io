@@ -1,0 +1,199 @@
+:root{
+  --bg:#0b0b10; --bg-2:#131319; --panel:#17171f; --line:#2a2a35;
+  --gold:#d4a24c; --violet:#7c5cff; --teal:#46c1a8;
+  --ink:#eeeaf5; --ink-dim:#8f8ba3;
+  --squircle: polygon(50% 0%, 61.8% 0.6%, 71.9% 2.5%, 80.3% 5.8%, 86.7% 10.3%, 91.4% 15.9%, 94.6% 22.6%, 96.7% 30.2%, 98% 38.6%, 98.8% 47.7%, 99% 50%, 98.8% 52.3%, 98% 61.4%, 96.7% 69.8%, 94.6% 77.4%, 91.4% 84.1%, 86.7% 89.7%, 80.3% 94.2%, 71.9% 97.5%, 61.8% 99.4%, 50% 100%, 38.2% 99.4%, 28.1% 97.5%, 19.7% 94.2%, 13.3% 89.7%, 8.6% 84.1%, 5.4% 77.4%, 3.3% 69.8%, 2% 61.4%, 1.2% 52.3%, 1% 50%, 1.2% 47.7%, 2% 38.6%, 3.3% 30.2%, 5.4% 22.6%, 8.6% 15.9%, 13.3% 10.3%, 19.7% 5.8%, 28.1% 2.5%, 38.2% 0.6%);
+}
+*{box-sizing:border-box;}
+html,body{ height:100%; }
+body{
+  margin:0; min-height:100%;
+  background:
+    radial-gradient(ellipse 900px 500px at 85% -10%, rgba(212,162,76,0.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at -10% 100%, rgba(124,92,255,0.10), transparent 60%),
+    var(--bg);
+  color:var(--ink); font-family:'IBM Plex Mono', monospace;
+}
+.app{ min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 20px 60px; }
+h1{
+  font-family:'Fraunces', serif; font-weight:600;
+  font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;
+  margin:0 0 6px; text-align:center;
+}
+.sub{ color:var(--ink-dim); font-size:13px; max-width:520px; text-align:center; line-height:1.6; margin-bottom:30px; }
+.steps{ display:flex; gap:8px; margin-bottom:30px; }
+.step-dot{
+  display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-dim);
+  padding:6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel);
+}
+.step-dot.active{ color:var(--gold); border-color:var(--gold); }
+
+/* ---------- VIEW: input ---------- */
+.view{ display:none; width:100%; }
+.view.active{ display:flex; justify-content:center; }
+.panel{
+  background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  padding:26px 26px 30px; width:100%; max-width:380px;
+}
+.panel h2{
+  font-family:'Fraunces', serif; font-size:15px; font-weight:600;
+  margin:0 0 4px; color:var(--gold); letter-spacing:0.02em;
+}
+.panel .hint-sm{ font-size:11.5px; color:var(--ink-dim); line-height:1.6; margin-bottom:18px; }
+label{
+  display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+  color:var(--ink-dim); margin-bottom:6px; margin-top:18px;
+}
+label:first-of-type{ margin-top:0; }
+input[type=text]{
+  width:100%; background:var(--bg-2); border:1px solid var(--line); border-radius:8px;
+  color:var(--ink); padding:11px 12px; font-family:'IBM Plex Mono', monospace;
+  font-size:16px; letter-spacing:0.03em; outline:none;
+}
+input[type=text]:focus{ border-color:var(--gold); }
+.filebtn{
+  display:block; width:100%; margin-top:8px; background:var(--bg-2);
+  border:1px dashed var(--line); color:var(--ink-dim); border-radius:9px;
+  padding:11px; font-size:11px; text-align:center; cursor:pointer;
+}
+.filebtn input{ display:none; }
+.filebtn.filled{ border-style:solid; border-color:var(--teal); color:var(--teal); }
+.btn{
+  width:100%; margin-top:24px; background:linear-gradient(180deg,#e4b667,var(--gold));
+  color:#1a1305; border:none; border-radius:9px; padding:13px;
+  font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:13px;
+  letter-spacing:0.03em; cursor:pointer;
+}
+.btn:active{ transform:translateY(1px); }
+.backlink{
+  align-self:flex-start; background:none; border:none; color:var(--ink-dim);
+  font-family:'IBM Plex Mono', monospace; font-size:12px; cursor:pointer;
+  display:flex; align-items:center; gap:6px; margin-bottom:18px;
+}
+.backlink:hover{ color:var(--gold); }
+
+/* ---------- PHONE (preview on desktop / large screens) ---------- */
+.phone-stage{ display:flex; flex-direction:column; align-items:center; width:100%; }
+.phone-frame{
+  position:relative; width:380px; height:800px;
+  border-radius:56px; padding:14px;
+  background:linear-gradient(160deg,#2c2c34,#0c0c10);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,0.6), inset 0 0 0 1px #38383f;
+}
+.phone-screen{
+  position:relative; width:100%; height:100%; border-radius:44px;
+  overflow:hidden; background:#000;
+}
+.wallpaper-layer{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  background-color:#141420;
+  background-image: linear-gradient(160deg,#1b1b2a 0%, #141420 50%, #0b0b12 100%);
+}
+.wallpaper-layer::after{
+  content:''; position:absolute; inset:0; background:rgba(0,0,0,0.18);
+}
+.status-bar{
+  position:absolute; top:0; left:0; right:0; height:56px; z-index:30;
+  display:flex; align-items:center; justify-content:space-between; padding:0 26px;
+  color:#fff; font-weight:600; font-size:15px; font-family:-apple-system,'SF Pro Text',sans-serif;
+  pointer-events:none;
+}
+.status-right{ display:flex; align-items:center; gap:6px; }
+.dynamic-island{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:110px; height:34px; background:#000; border-radius:17px; z-index:31;
+}
+.bars{ display:flex; align-items:flex-end; gap:2.5px; height:12px; }
+.bars i{ width:3.5px; background:#fff; border-radius:1px; display:block; }
+.bars i:nth-child(1){ height:40%; } .bars i:nth-child(2){ height:60%; }
+.bars i:nth-child(3){ height:80%; } .bars i:nth-child(4){ height:100%; }
+.batt{ width:24px; height:12px; border:1.3px solid rgba(255,255,255,0.7); border-radius:3px; position:relative; }
+.batt::before{ content:''; position:absolute; top:1.5px; left:1.5px; right:5px; bottom:1.5px; background:rgba(255,255,255,0.85); border-radius:1px; }
+.batt::after{ content:''; position:absolute; right:-4px; top:3.5px; width:2px; height:5px; background:rgba(255,255,255,0.7); border-radius:0 1px 1px 0; }
+
+.screens-viewport{ position:absolute; inset:0; overflow:hidden; }
+.screens-track{
+  display:flex; width:300%; height:100%;
+  transition: transform .35s cubic-bezier(.22,.61,.36,1);
+}
+.home-screen{
+  position:relative; width:33.333%; height:100%; padding:72px 20px 0;
+  display:grid; grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:min-content; gap:22px 0; justify-items:center;
+  -webkit-user-select:none; user-select:none;
+}
+
+.icon-cell{ display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; }
+.icon-squircle{
+  width:60px; height:60px; clip-path:var(--squircle);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 8px rgba(0,0,0,0.35);
+  position:relative; background-size:cover; background-position:center;
+}
+.icon-squircle svg{ width:56%; height:56%; }
+.icon-squircle img{ width:100%; height:100%; object-fit:cover; }
+.icon-label{
+  font-family:-apple-system,'SF Pro Text',sans-serif; font-size:10.5px;
+  color:rgba(255,255,255,0.92); text-shadow:0 1px 2px rgba(0,0,0,0.5);
+  text-align:center; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.letter-glyph{
+  font-family:-apple-system,'SF Pro Rounded','SF Pro Text',sans-serif;
+  font-weight:800; font-size:28px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.25);
+}
+
+.page-dots{
+  position:absolute; bottom:104px; left:0; right:0; z-index:20;
+  display:flex; justify-content:center; gap:7px; pointer-events:none;
+}
+.page-dots i{ width:6.5px; height:6.5px; border-radius:50%; background:rgba(255,255,255,0.35); transition:background .2s; }
+.page-dots i.active{ background:#fff; }
+
+.dock{
+  position:absolute; left:14px; right:14px; bottom:20px; height:88px; z-index:25;
+  background:rgba(255,255,255,0.14); backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,0.15); border-radius:30px;
+  display:flex; align-items:center; justify-content:space-around; padding:0 12px;
+}
+.dock .icon-squircle{ width:60px; height:60px; }
+
+.phone-hint{ margin-top:18px; font-size:11.5px; color:var(--ink-dim); text-align:center; max-width:340px; line-height:1.6; }
+.phone-hint b{ color:var(--teal); }
+
+footer{ margin-top:44px; font-size:11px; color:#4d4a5c; text-align:center; max-width:560px; line-height:1.7; }
+
+/* =========================================================
+   ПОЛНОЭКРАННЫЙ РЕЖИМ НА ТЕЛЕФОНЕ
+   На узких экранах страница «Телефон» занимает весь вьюпорт
+   без рамки-мокапа — выглядит как настоящий экран, а не карточка.
+   ========================================================= */
+@media (max-width: 500px){
+  #viewPhone.view.active{
+    position:fixed; inset:0; z-index:100;
+    padding:0; margin:0; background:#000;
+  }
+  .phone-stage{ height:100%; }
+  .backlink{
+    position:absolute; top:calc(env(safe-area-inset-top,0px) + 8px); left:12px; z-index:200;
+    background:rgba(0,0,0,0.35); padding:6px 12px; border-radius:20px; margin:0;
+    backdrop-filter: blur(4px);
+  }
+  .phone-frame{
+    width:100vw; height:100dvh; padding:0; border-radius:0;
+    box-shadow:none; background:none;
+  }
+  .phone-screen{ border-radius:0; height:100%; }
+  .phone-hint{ display:none; }
+  footer{ display:none; }
+}
+
+/* Запущено как установленное на "Домой" приложение (без Safari UI):
+   реальная системная статус-бар iOS уже показывает настоящее время —
+   наша нарисованная статус-бар/остров становится не нужна и скрывается,
+   а контент уходит под безопасную зону сверху. */
+@media (display-mode: standalone){
+  .status-bar, .dynamic-island{ display:none; }
+  .home-screen{ padding-top: calc(env(safe-area-inset-top,0px) + 16px); }
+  .dock{ bottom: calc(env(safe-area-inset-bottom,0px) + 8px); }
+  .page-dots{ bottom: calc(env(safe-area-inset-bottom,0px) + 96px); }
+}

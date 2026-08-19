@@ -1,0 +1,16 @@
+{
+  "name": "Слово из иконок",
+  "short_name": "Иконки-слово",
+  "start_url": "index.html?view=phone",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b10",
+  "theme_color": "#0b0b10",
+  "icons": [
+    {
+      "src": "icons/app-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

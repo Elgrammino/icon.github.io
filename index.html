@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Слово из иконок — симулятор iPhone</title>
+
+<!-- PWA / "Добавить на экран Домой" -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b10">
+<!-- Положи сюда свою иконку 180x180 px, см. icons/app-icon-README.txt -->
+<link rel="apple-touch-icon" href="icons/app-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <h1>Слово из иконок</h1>
+  <div class="sub">Симулятор экрана iPhone: три «домашних экрана», как при обычном свайпе. Слово превращается в иконки-буквы на третьем экране.</div>
+
+  <div class="steps">
+    <div class="step-dot active" id="stepDot1">① Слово</div>
+    <div class="step-dot" id="stepDot2">② Телефон</div>
+  </div>
+
+  <!-- ===== VIEW 1: INPUT ===== -->
+  <div class="view active" id="viewInput">
+    <div class="panel">
+      <h2>Настройка</h2>
+      <div class="hint-sm">Обои — необязательно, но помогают почувствовать финальный вид. Иконки на 1-м и 2-м экране фиксированные, чтобы ничего не «прыгало» при смене обоев.</div>
+
+      <label style="margin-top:0">Слово</label>
+      <input type="text" id="wordInput" value="МАГИЯ" maxlength="12">
+
+      <label>Обои телефона (необязательно)</label>
+      <label class="filebtn" id="wallLabel">
+        🖼 Загрузить фон
+        <input type="file" id="wallInput" accept="image/*">
+      </label>
+
+      <button class="btn" id="goPhoneBtn">Показать на телефоне →</button>
+    </div>
+  </div>
+
+  <!-- ===== VIEW 2: PHONE (открывается на весь экран на мобильном) ===== -->
+  <div class="view" id="viewPhone">
+    <div class="phone-stage">
+      <button class="backlink" id="backBtn">← назад к слову</button>
+
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="wallpaper-layer" id="wallpaperLayer"></div>
+
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-right">
+              <div class="bars"><i></i><i></i><i></i><i></i></div>
+              <svg width="17" height="13" viewBox="0 0 17 13" fill="none"><path d="M8.5 11.2C9.1 11.2 9.6 10.7 9.6 10.1C9.6 9.5 9.1 9 8.5 9C7.9 9 7.4 9.5 7.4 10.1C7.4 10.7 7.9 11.2 8.5 11.2Z" fill="white"/><path d="M5.6 7.6C6.4 6.9 7.4 6.5 8.5 6.5C9.6 6.5 10.6 6.9 11.4 7.6" stroke="white" stroke-width="1.3" stroke-linecap="round"/><path d="M2.8 4.6C4.4 3.1 6.4 2.3 8.5 2.3C10.6 2.3 12.6 3.1 14.2 4.6" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <div class="batt"></div>
+            </div>
+          </div>
+
+          <div class="screens-viewport" id="viewport">
+            <div class="screens-track" id="track">
+              <div class="home-screen" id="screen1"></div>
+              <div class="home-screen" id="screen2"></div>
+              <div class="home-screen" id="screen3"></div>
+            </div>
+          </div>
+
+          <div class="page-dots" id="pageDots"><i class="active"></i><i></i><i></i></div>
+
+          <div class="dock" id="dock"></div>
+        </div>
+      </div>
+
+      <div class="phone-hint">Свайпни экран влево — на третьем «домашнем экране» иконки сложатся в слово: <b id="wordEcho">МАГИЯ</b>.</div>
+    </div>
+  </div>
+
+  <footer>Всё работает локально, офлайн. Чтобы экран открывался у зрителя на весь экран без адресной строки Safari — см. README.md, раздел «Полноэкранный режим».</footer>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
