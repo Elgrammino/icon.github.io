@@ -1,12 +1,18 @@
+/* ============================================================
+   МЕТРИКИ
+   Всё в "pt" iPhone 15 Pro Max (ширина 430pt). Переменная --pt
+   выставляется из JS = реальная ширина экрана / 430, поэтому
+   пропорции совпадают с настоящим телефоном на любом устройстве.
+   Иконка 64pt, сетка 4 колонки × 6 рядов.
+   ============================================================ */
 :root{
+  --pt: 1px;
   --bg:#0b0b10; --bg-2:#131319; --panel:#17171f; --line:#2a2a35;
-  --gold:#d4a24c; --violet:#7c5cff; --teal:#46c1a8;
+  --gold:#d4a24c; --teal:#46c1a8;
   --ink:#eeeaf5; --ink-dim:#8f8ba3;
-  --squircle: polygon(50% 0%, 61.8% 0.6%, 71.9% 2.5%, 80.3% 5.8%, 86.7% 10.3%, 91.4% 15.9%, 94.6% 22.6%, 96.7% 30.2%, 98% 38.6%, 98.8% 47.7%, 99% 50%, 98.8% 52.3%, 98% 61.4%, 96.7% 69.8%, 94.6% 77.4%, 91.4% 84.1%, 86.7% 89.7%, 80.3% 94.2%, 71.9% 97.5%, 61.8% 99.4%, 50% 100%, 38.2% 99.4%, 28.1% 97.5%, 19.7% 94.2%, 13.3% 89.7%, 8.6% 84.1%, 5.4% 77.4%, 3.3% 69.8%, 2% 61.4%, 1.2% 52.3%, 1% 50%, 1.2% 47.7%, 2% 38.6%, 3.3% 30.2%, 5.4% 22.6%, 8.6% 15.9%, 13.3% 10.3%, 19.7% 5.8%, 28.1% 2.5%, 38.2% 0.6%);
 }
-*{box-sizing:border-box;}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body{ height:100%; overscroll-behavior:none; }
-body.lock-scroll{ position:fixed; inset:0; width:100%; overflow:hidden; touch-action:none; }
 body{
   margin:0; min-height:100%;
   background:
@@ -15,222 +21,244 @@ body{
     var(--bg);
   color:var(--ink); font-family:'IBM Plex Mono', monospace;
 }
-.app{ min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 20px 60px; }
-h1{
-  font-family:'Fraunces', serif; font-weight:600;
-  font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;
-  margin:0 0 6px; text-align:center;
-}
-.sub{ color:var(--ink-dim); font-size:13px; max-width:520px; text-align:center; line-height:1.6; margin-bottom:30px; }
-.steps{ display:flex; gap:8px; margin-bottom:30px; }
-.step-dot{
-  display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-dim);
-  padding:6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel);
-}
-.step-dot.active{ color:var(--gold); border-color:var(--gold); }
+body.lock-scroll{ position:fixed; inset:0; width:100%; overflow:hidden; touch-action:none; }
 
-/* ---------- VIEW: input ---------- */
+.app{ min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:36px 20px 60px; }
+h1{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(22px,4vw,32px); margin:0 0 6px; text-align:center; }
+.sub{ color:var(--ink-dim); font-size:12.5px; max-width:520px; text-align:center; line-height:1.6; margin-bottom:26px; }
+
+/* ---------- страница ввода ---------- */
 .view{ display:none; width:100%; }
 .view.active{ display:flex; justify-content:center; }
-.panel{
-  background:var(--panel); border:1px solid var(--line); border-radius:16px;
-  padding:26px 26px 30px; width:100%; max-width:380px;
-}
-.panel h2{
-  font-family:'Fraunces', serif; font-size:15px; font-weight:600;
-  margin:0 0 4px; color:var(--gold); letter-spacing:0.02em;
-}
-.panel .hint-sm{ font-size:11.5px; color:var(--ink-dim); line-height:1.6; margin-bottom:18px; }
-label{
-  display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
-  color:var(--ink-dim); margin-bottom:6px; margin-top:18px;
-}
-label:first-of-type{ margin-top:0; }
+.panel{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px; width:100%; max-width:400px; }
+.panel h2{ font-family:'Fraunces',serif; font-size:14px; font-weight:600; margin:0 0 4px; color:var(--gold); }
+.panel h2:not(:first-child){ margin-top:26px; padding-top:20px; border-top:1px solid var(--line); }
+.hint-sm{ font-size:11.5px; color:var(--ink-dim); line-height:1.6; margin-bottom:16px; }
+label.fld{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); margin:16px 0 6px; }
 input[type=text]{
   width:100%; background:var(--bg-2); border:1px solid var(--line); border-radius:8px;
-  color:var(--ink); padding:11px 12px; font-family:'IBM Plex Mono', monospace;
-  font-size:16px; letter-spacing:0.03em; outline:none;
+  color:var(--ink); padding:11px 12px; font-family:'IBM Plex Mono',monospace; font-size:16px; outline:none;
 }
 input[type=text]:focus{ border-color:var(--gold); }
 .filebtn{
-  display:block; width:100%; margin-top:8px; background:var(--bg-2);
-  border:1px dashed var(--line); color:var(--ink-dim); border-radius:9px;
-  padding:11px; font-size:11px; text-align:center; cursor:pointer;
+  display:block; width:100%; margin-top:8px; background:var(--bg-2); border:1px dashed var(--line);
+  color:var(--ink-dim); border-radius:9px; padding:11px; font-size:11px; text-align:center; cursor:pointer;
 }
 .filebtn input{ display:none; }
 .filebtn.filled{ border-style:solid; border-color:var(--teal); color:var(--teal); }
 .btn{
-  width:100%; margin-top:24px; background:linear-gradient(180deg,#e4b667,var(--gold));
+  width:100%; margin-top:22px; background:linear-gradient(180deg,#e4b667,var(--gold));
   color:#1a1305; border:none; border-radius:9px; padding:13px;
-  font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:13px;
-  letter-spacing:0.03em; cursor:pointer;
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px; cursor:pointer;
 }
 .btn:active{ transform:translateY(1px); }
-.backlink{
-  align-self:flex-start; background:none; border:none; color:var(--ink-dim);
-  font-family:'IBM Plex Mono', monospace; font-size:12px; cursor:pointer;
-  display:flex; align-items:center; gap:6px; margin-bottom:18px;
+.badge-list{ max-height:230px; overflow-y:auto; border:1px solid var(--line); border-radius:9px; padding:8px; background:var(--bg-2); }
+.badge-row{ display:flex; align-items:center; gap:10px; padding:5px 4px; font-size:11.5px; }
+.badge-row span{ flex:1; color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.badge-row input{
+  width:56px; background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  color:var(--ink); padding:5px; font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:center;
 }
-.backlink:hover{ color:var(--gold); }
 
-/* ---------- PHONE (preview on desktop / large screens) ---------- */
+/* ============================================================
+   ТЕЛЕФОН
+   ============================================================ */
 .phone-stage{ display:flex; flex-direction:column; align-items:center; width:100%; }
 .phone-frame{
-  position:relative; width:380px; height:800px;
-  border-radius:56px; padding:14px;
+  position:relative; width:430px; height:932px; max-height:calc(100vh - 120px);
+  border-radius:60px; padding:14px;
   background:linear-gradient(160deg,#2c2c34,#0c0c10);
-  box-shadow:0 30px 60px -20px rgba(0,0,0,0.6), inset 0 0 0 1px #38383f;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6), inset 0 0 0 1px #38383f;
 }
-.phone-screen{
-  position:relative; width:100%; height:100%; border-radius:44px;
-  overflow:hidden; background:#000;
-}
+.phone-screen{ position:relative; width:100%; height:100%; border-radius:48px; overflow:hidden; background:#000; }
+
 .wallpaper-layer{
   position:absolute; inset:0; background-size:cover; background-position:center;
-  background-color:#141420;
-  background-image: linear-gradient(160deg,#1b1b2a 0%, #141420 50%, #0b0b12 100%);
+  background-image:linear-gradient(165deg,#1e2b38 0%,#16212c 45%,#070a0d 100%);
 }
-.wallpaper-layer::after{
-  content:''; position:absolute; inset:0; background:rgba(0,0,0,0.18);
-}
-.status-bar{
-  position:absolute; top:0; left:0; right:0; height:56px; z-index:30;
-  display:flex; align-items:center; justify-content:space-between; padding:0 26px;
-  color:#fff; font-weight:600; font-size:15px; font-family:-apple-system,'SF Pro Text',sans-serif;
-  pointer-events:none;
-}
-.status-right{ display:flex; align-items:center; gap:6px; }
-.dynamic-island{
-  position:absolute; top:12px; left:50%; transform:translateX(-50%);
-  width:110px; height:34px; background:#000; border-radius:17px; z-index:31;
-}
-.bars{ display:flex; align-items:flex-end; gap:2.5px; height:12px; }
-.bars i{ width:3.5px; background:#fff; border-radius:1px; display:block; }
-.bars i:nth-child(1){ height:40%; } .bars i:nth-child(2){ height:60%; }
-.bars i:nth-child(3){ height:80%; } .bars i:nth-child(4){ height:100%; }
-.batt{ width:24px; height:12px; border:1.3px solid rgba(255,255,255,0.7); border-radius:3px; position:relative; }
-.batt::before{ content:''; position:absolute; top:1.5px; left:1.5px; right:5px; bottom:1.5px; background:rgba(255,255,255,0.85); border-radius:1px; }
-.batt::after{ content:''; position:absolute; right:-4px; top:3.5px; width:2px; height:5px; background:rgba(255,255,255,0.7); border-radius:0 1px 1px 0; }
 
-.screens-viewport{ position:absolute; inset:0; overflow:hidden; }
-.screens-track{
-  display:flex; width:300%; height:100%;
-  transition: transform .35s cubic-bezier(.22,.61,.36,1);
+/* нарисованный статус-бар — только для десктоп-превью.
+   В PWA на телефоне он скрыт, там видна настоящая системная строка. */
+.status-bar{
+  position:absolute; top:0; left:0; right:0; z-index:30;
+  height:calc(54*var(--pt)); padding:0 calc(30*var(--pt));
+  display:flex; align-items:center; justify-content:space-between;
+  color:#fff; font-weight:600; font-size:calc(17*var(--pt));
+  font-family:-apple-system,'SF Pro Text',sans-serif; pointer-events:none;
 }
+.status-right{ display:flex; align-items:center; gap:calc(6*var(--pt)); }
+.bars{ display:flex; align-items:flex-end; gap:calc(2*var(--pt)); height:calc(11*var(--pt)); }
+.bars i{ width:calc(3.5*var(--pt)); background:#fff; border-radius:1px; display:block; }
+.bars i:nth-child(1){height:38%} .bars i:nth-child(2){height:58%}
+.bars i:nth-child(3){height:79%} .bars i:nth-child(4){height:100%}
+.batt{ width:calc(25*var(--pt)); height:calc(12*var(--pt)); border:calc(1.2*var(--pt)) solid rgba(255,255,255,.6); border-radius:calc(3.5*var(--pt)); position:relative; }
+.batt::before{ content:''; position:absolute; inset:calc(1.6*var(--pt)); right:35%; background:#fff; border-radius:1px; }
+.batt::after{ content:''; position:absolute; right:calc(-3.4*var(--pt)); top:32%; width:calc(1.8*var(--pt)); height:36%; background:rgba(255,255,255,.6); border-radius:0 2px 2px 0; }
+
+/* ---------- страницы домашнего экрана ---------- */
+.screens-viewport{ position:absolute; inset:0; overflow:hidden; z-index:5; }
+.screens-track{ display:flex; width:300%; height:100%; transition:transform .32s cubic-bezier(.22,.61,.36,1); }
 .home-screen{
-  position:relative; width:33.333%; height:100%; padding:72px 20px 0;
+  position:relative; width:33.3333%; height:100%;
+  padding:calc(var(--safe-top) + 34*var(--pt)) calc(26*var(--pt)) 0;
   display:grid; grid-template-columns:repeat(4,1fr);
-  grid-auto-rows:min-content; gap:22px 0; justify-items:center;
+  grid-template-rows:repeat(6,calc(102*var(--pt)));
+  justify-items:center; align-content:start;
   -webkit-user-select:none; user-select:none;
 }
 
-.icon-cell{ display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; }
-.icon-squircle{
-  width:60px; height:60px; clip-path:var(--squircle);
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 3px 8px rgba(0,0,0,0.35);
-  position:relative; background-size:cover; background-position:center;
+/* ---------- иконка ---------- */
+.icon-cell{
+  display:flex; flex-direction:column; align-items:center;
+  gap:calc(5*var(--pt)); width:100%;
 }
-.icon-squircle svg{ width:56%; height:56%; }
-.icon-squircle img{ width:100%; height:100%; object-fit:cover; }
+.icon-hop{ display:block; } /* внешний слой — вертикальный «подскок» в jiggle-режиме */
+.icon-rot{ display:block; } /* внутренний слой — поворот */
+.icon-squircle{
+  position:relative;
+  width:calc(64*var(--pt)); height:calc(64*var(--pt));
+  border-radius:calc(14.5*var(--pt));  /* iOS 26 continuous corner ≈ 22.5% */
+  overflow:hidden;
+  background:#2c2c36;
+  box-shadow:0 calc(1.5*var(--pt)) calc(5*var(--pt)) rgba(0,0,0,.28);
+}
+.icon-squircle img{ width:100%; height:100%; object-fit:cover; display:block; }
+.icon-squircle svg{ width:100%; height:100%; display:block; }
 .icon-label{
-  font-family:-apple-system,'SF Pro Text',sans-serif; font-size:10.5px;
-  color:rgba(255,255,255,0.92); text-shadow:0 1px 2px rgba(0,0,0,0.5);
-  text-align:center; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:-apple-system,'SF Pro Text',sans-serif;
+  font-size:calc(11.5*var(--pt)); line-height:1.15; font-weight:400;
+  color:#fff; text-shadow:0 calc(1*var(--pt)) calc(3*var(--pt)) rgba(0,0,0,.55);
+  text-align:center; max-width:calc(88*var(--pt));
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.icon-wrap{ position:relative; }
+.badge{
+  position:absolute; top:calc(-4*var(--pt)); right:calc(-4*var(--pt)); z-index:6;
+  min-width:calc(21*var(--pt)); height:calc(21*var(--pt)); padding:0 calc(5*var(--pt));
+  background:#ff3b30; border-radius:calc(11*var(--pt));
+  color:#fff; font-family:-apple-system,'SF Pro Text',sans-serif;
+  font-size:calc(13*var(--pt)); font-weight:600; line-height:calc(21*var(--pt));
+  text-align:center; box-shadow:0 0 0 calc(1.5*var(--pt)) rgba(0,0,0,.12);
 }
 .letter-glyph{
-  font-family:-apple-system,'SF Pro Rounded','SF Pro Text',sans-serif;
-  font-weight:800; font-size:28px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.25);
-}
-.icon-squircle.is-blank{ box-shadow:none; opacity:0; pointer-events:none; }
-
-/* ---------- iOS-style edit-mode wiggle (долгое нажатие) ---------- */
-@keyframes iosWiggle{
-  0%,100%{ transform:rotate(-1.4deg); }
-  50%{ transform:rotate(1.4deg); }
-}
-.icon-cell.jiggling .icon-squircle{
-  animation:iosWiggle .24s ease-in-out infinite;
-  animation-delay: calc(var(--jiggle-seed, 0) * 1s);
-}
-.icon-cell.jiggling .icon-squircle::before{
-  content:'−'; position:absolute; top:-6px; left:-6px; width:19px; height:19px;
-  background:#ff3b30; border-radius:50%; color:#fff; font-size:15px; line-height:19px;
-  text-align:center; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,0.45);
-  z-index:5; animation:none;
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  font-family:-apple-system,'SF Pro Rounded',sans-serif;
+  font-weight:700; font-size:calc(32*var(--pt)); color:#fff;
 }
 
+/* ---------- режим редактирования (jiggle) ----------
+   Реальный iOS: поворот ±2°, два независимых цикла ~0.14с и ~0.18с,
+   плюс лёгкое вертикальное подпрыгивание. Фаза у каждой иконки своя. */
+@keyframes iosRot{ 0%,100%{ transform:rotate(-2deg);} 50%{ transform:rotate(2deg);} }
+@keyframes iosHop{ 0%,100%{ transform:translateY(calc(-0.9*var(--pt)));} 50%{ transform:translateY(calc(0.9*var(--pt)));} }
+.jiggling .icon-rot{
+  animation:iosRot var(--rot-dur,.14s) ease-in-out infinite;
+  animation-delay:var(--rot-delay,0s);
+}
+.jiggling .icon-hop{
+  animation:iosHop var(--hop-dur,.18s) ease-in-out infinite;
+  animation-delay:var(--hop-delay,0s);
+}
+.remove-dot{
+  position:absolute; top:calc(-5*var(--pt)); left:calc(-5*var(--pt)); z-index:7;
+  width:calc(22*var(--pt)); height:calc(22*var(--pt)); border-radius:50%;
+  background:rgba(70,70,74,.92); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center;
+  box-shadow:0 calc(1*var(--pt)) calc(3*var(--pt)) rgba(0,0,0,.4);
+}
+.remove-dot::before{
+  content:''; width:calc(11*var(--pt)); height:calc(2*var(--pt));
+  background:#fff; border-radius:2px;
+}
+.jiggling .remove-dot{ display:flex; }
+
+.done-btn{
+  position:absolute; z-index:60;
+  top:calc(var(--safe-top) + 4*var(--pt)); right:calc(20*var(--pt));
+  padding:calc(7*var(--pt)) calc(17*var(--pt));
+  background:rgba(255,255,255,.22); backdrop-filter:blur(14px) saturate(150%);
+  border:calc(.5*var(--pt)) solid rgba(255,255,255,.28);
+  border-radius:calc(18*var(--pt));
+  color:#fff; font-family:-apple-system,'SF Pro Text',sans-serif;
+  font-size:calc(15*var(--pt)); font-weight:600;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.edit-mode .done-btn{ opacity:1; pointer-events:auto; }
+
+/* ---------- точки страниц / поиск / док ---------- */
 .page-dots{
-  position:absolute; bottom:104px; left:0; right:0; z-index:20;
-  display:flex; justify-content:center; gap:7px; pointer-events:none;
+  position:absolute; left:0; right:0; z-index:20;
+  bottom:calc(var(--safe-bottom) + 160*var(--pt));
+  display:flex; justify-content:center; gap:calc(7*var(--pt)); pointer-events:none;
 }
-.page-dots i{ width:6.5px; height:6.5px; border-radius:50%; background:rgba(255,255,255,0.35); transition:background .2s; }
-.page-dots i.active{ background:#fff; }
+.page-dots i{ width:calc(7*var(--pt)); height:calc(7*var(--pt)); border-radius:50%; background:rgba(255,255,255,.32); transition:background .2s; }
+.page-dots i.active{ background:rgba(255,255,255,.95); }
+
+.search-pill{
+  position:absolute; left:50%; transform:translateX(-50%); z-index:20;
+  bottom:calc(var(--safe-bottom) + 118*var(--pt));
+  display:flex; align-items:center; gap:calc(4*var(--pt));
+  padding:calc(6*var(--pt)) calc(14*var(--pt));
+  background:rgba(255,255,255,.18); backdrop-filter:blur(16px) saturate(160%);
+  border-radius:calc(17*var(--pt));
+  color:#fff; font-family:-apple-system,'SF Pro Text',sans-serif;
+  font-size:calc(14*var(--pt)); font-weight:500; pointer-events:none;
+}
+.search-pill svg{ width:calc(13*var(--pt)); height:calc(13*var(--pt)); }
 
 .dock{
-  position:absolute; left:14px; right:14px; bottom:20px; height:88px; z-index:25;
-  background:rgba(255,255,255,0.14); backdrop-filter:blur(6px);
-  border:1px solid rgba(255,255,255,0.15); border-radius:30px;
-  display:flex; align-items:center; justify-content:space-around; padding:0 12px;
+  position:absolute; z-index:20;
+  left:calc(12*var(--pt)); right:calc(12*var(--pt));
+  bottom:calc(var(--safe-bottom) + 12*var(--pt));
+  height:calc(96*var(--pt));
+  background:rgba(255,255,255,.17); backdrop-filter:blur(22px) saturate(170%);
+  border-radius:calc(46*var(--pt));
+  display:flex; align-items:center; justify-content:space-evenly;
 }
-.dock .icon-squircle{ width:60px; height:60px; }
 
-/* Home Indicator — тонкая плашка снизу, есть на КАЖДОМ экране iPhone X и новее.
-   Без неё экран визуально считывается как "не настоящий". */
 .home-indicator{
-  position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
-  width:134px; height:5px; border-radius:3px;
-  background:rgba(255,255,255,0.85); z-index:40; pointer-events:none;
+  position:absolute; left:50%; transform:translateX(-50%); z-index:40;
+  bottom:calc(8*var(--pt)); width:calc(140*var(--pt)); height:calc(5*var(--pt));
+  border-radius:calc(3*var(--pt)); background:rgba(255,255,255,.85); pointer-events:none;
 }
 
-.phone-hint{ margin-top:18px; font-size:11.5px; color:var(--ink-dim); text-align:center; max-width:340px; line-height:1.6; }
+/* ---------- невидимые зоны триггера ---------- */
+.trigger-zone{ position:absolute; z-index:50; }
+.trigger-zone input{
+  /* невидимый switch: настоящее касание пальцем по нему включает
+     Taptic Engine (единственный доступный в Safari путь к вибрации) */
+  position:absolute; inset:0; width:100%; height:100%;
+  opacity:0; margin:0; appearance:none; -webkit-appearance:none;
+}
+body.debug-zones .trigger-zone{ background:rgba(255,0,80,.25); outline:1px dashed #ff0050; }
+
+/* ---------- фальшивый скриншот для меню многозадачности ---------- */
+.fake-cover{
+  position:fixed; inset:0; z-index:9999; display:none;
+  background:#000 center/cover no-repeat;
+}
+.fake-cover.on{ display:block; }
+
+.phone-hint{ margin-top:16px; font-size:11.5px; color:var(--ink-dim); text-align:center; max-width:400px; line-height:1.6; }
 .phone-hint b{ color:var(--teal); }
+footer{ margin-top:40px; font-size:11px; color:#4d4a5c; text-align:center; max-width:560px; line-height:1.7; }
 
-footer{ margin-top:44px; font-size:11px; color:#4d4a5c; text-align:center; max-width:560px; line-height:1.7; }
-
-/* =========================================================
-   ПОЛНОЭКРАННЫЙ РЕЖИМ НА ТЕЛЕФОНЕ
-   На узких экранах страница «Телефон» занимает весь вьюпорт
-   без рамки-мокапа — выглядит как настоящий экран, а не карточка.
-   ========================================================= */
-@media (max-width: 500px){
-  #viewPhone.view.active{
-    position:fixed; inset:0; z-index:100;
-    height: var(--app-height, 100dvh);
-    padding:0; margin:0; background:#000;
-  }
+/* ============================================================
+   МОБИЛЬНЫЙ ПОЛНОЭКРАННЫЙ РЕЖИМ
+   ============================================================ */
+@media (max-width:520px){
+  #viewPhone.view.active{ position:fixed; inset:0; z-index:100; padding:0; margin:0; background:#000; }
   .phone-stage{ height:100%; }
-  /* Кнопка "назад" по умолчанию СКРЫТА — на настоящем экране её быть не должно.
-     Появляется только на несколько секунд после тройного тапа по верхней
-     части экрана (см. секретный триггер в js/app.js). */
-  .backlink{
-    position:absolute; top:calc(env(safe-area-inset-top,0px) + 8px); left:12px; z-index:200;
-    background:rgba(0,0,0,0.55); padding:6px 12px; border-radius:20px; margin:0;
-    backdrop-filter: blur(4px);
-    opacity:0; pointer-events:none; transition:opacity .25s;
-  }
-  body.show-back .backlink{ opacity:1; pointer-events:auto; }
   .phone-frame{
-    width:100vw; height:calc(var(--app-height, 100dvh)); padding:0; border-radius:0;
-    box-shadow:none; background:none;
+    width:100vw; height:var(--app-height,100dvh); max-height:none;
+    padding:0; border-radius:0; box-shadow:none; background:none;
   }
   .phone-screen{ border-radius:0; height:100%; }
-  .phone-hint{ display:none; }
-  footer{ display:none; }
-}
-/* Невидимая зона для тройного тапа — вызов кнопки "назад" (верхняя полоса экрана) */
-.secret-back-trigger{
-  position:absolute; top:0; left:0; right:0; height:64px; z-index:35;
+  .phone-hint, footer, .app > h1, .app > .sub{ display:none; }
 }
 
-/* Запущено как установленное на "Домой" приложение (без Safari UI):
-   реальная системная статус-бар iOS уже показывает настоящее время —
-   наша нарисованная статус-бар/остров становится не нужна и скрывается,
-   а контент уходит под безопасную зону сверху. */
+/* Запущено как PWA с экрана «Домой»: настоящая системная статус-бар
+   уже показывает реальное время/батарею — нашу прячем. */
 @media (display-mode: standalone){
-  .status-bar, .dynamic-island{ display:none; }
-  .home-screen{ padding-top: calc(env(safe-area-inset-top,0px) + 16px); }
-  .dock{ bottom: calc(env(safe-area-inset-bottom,0px) + 8px); }
-  .page-dots{ bottom: calc(env(safe-area-inset-bottom,0px) + 96px); }
-  .home-indicator{ bottom: calc(env(safe-area-inset-bottom,0px) + 6px); }
+  .status-bar{ display:none; }
 }
