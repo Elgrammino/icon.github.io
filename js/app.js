@@ -133,6 +133,99 @@ function renderStaticScreen(container, apps){
   apps.forEach(a => container.appendChild(iconCell(a, a.name)));
 }
 
+// ---------- применить app-объект к уже существующей ячейке (для анимации свапа) ----------
+function applyAppToCell(cellEl, app){
+  const sq = cellEl.querySelector('.icon-squircle');
+  const labelEl = cellEl.querySelector('.icon-label');
+  if(!app || app.blank){
+    sq.classList.add('is-blank');
+    sq.style.background = 'transparent';
+    sq.style.backgroundImage = 'none';
+    sq.innerHTML = '';
+    if(labelEl) labelEl.textContent = '';
+    return;
+  }
+  sq.classList.remove('is-blank');
+  const glyphHTML = app.isLetter ? `<span class="letter-glyph">${app.name}</span>` : (GLYPHS[app.glyphKey] || '');
+  const showFallback = () => {
+    sq.style.backgroundImage = 'none';
+    sq.style.background = app.bg;
+    sq.innerHTML = glyphHTML;
+  };
+  if(app.file){
+    const img = new Image();
+    img.onload = () => {
+      sq.style.background = 'none';
+      sq.innerHTML = '';
+      img.alt = '';
+      sq.appendChild(img);
+    };
+    img.onerror = showFallback;
+    img.src = app.file;
+  } else {
+    showFallback();
+  }
+  if(labelEl) labelEl.textContent = app.name || '';
+}
+
+// ---------- слово -> массив app-объектов под конкретное число слотов сетки ----------
+function buildWordAppsForSlots(word, slotCount){
+  const letters = (word||'').toUpperCase().replace(/[^A-ZА-ЯЁ0-9]/g,'').split('').slice(0, slotCount);
+  const apps = [];
+  for(let i=0;i<slotCount;i++){
+    const ch = letters[i];
+    if(!ch){ apps.push({blank:true}); continue; }
+    apps.push({ name: ch, file: letterIconPath(ch), bg: LETTER_COLORS[i % LETTER_COLORS.length], isLetter: true });
+  }
+  return apps;
+}
+
+// ---------- один эффект смены иконки: улёт / переворот / глитч ----------
+// EFFECT_POOL можно будет вынести в настройки (кнопка кастомизации) —
+// пока случайный выбор при каждом запуске.
+const EFFECT_POOL = ['fly', 'flip', 'glitch'];
+
+function animateIconSwap(sqEl, effect, onMidSwap){
+  return new Promise(resolve => {
+    const dur = 550 + Math.random()*150;
+    let keyframes;
+    if(effect === 'fly'){
+      const angle = Math.random()*Math.PI*2;
+      const dist = 150 + Math.random()*70;
+      const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist;
+      keyframes = [
+        { transform:'translate(0,0) scale(1)', opacity:1, offset:0 },
+        { transform:`translate(${dx}px,${dy}px) scale(.35)`, opacity:0, offset:0.48 },
+        { transform:`translate(${-dx*0.7}px,${-dy*0.7}px) scale(.35)`, opacity:0, offset:0.52 },
+        { transform:'translate(0,0) scale(1)', opacity:1, offset:1 },
+      ];
+    } else if(effect === 'flip'){
+      keyframes = [
+        { transform:'rotateY(0deg) scale(1)', offset:0 },
+        { transform:'rotateY(88deg) scale(.92)', offset:0.48 },
+        { transform:'rotateY(-88deg) scale(.92)', offset:0.52 },
+        { transform:'rotateY(0deg) scale(1)', offset:1 },
+      ];
+    } else { // glitch
+      keyframes = [
+        { transform:'translate(0,0)', filter:'none', clipPath:'inset(0 0 0 0)', offset:0 },
+        { transform:'translate(-4px,2px)', filter:'hue-rotate(45deg) saturate(3)', clipPath:'inset(8% 0 42% 0)', offset:0.14 },
+        { transform:'translate(3px,-3px)', filter:'hue-rotate(-35deg) saturate(2)', clipPath:'inset(52% 0 4% 0)', offset:0.28 },
+        { transform:'translate(-3px,0)', filter:'contrast(2.2)', clipPath:'inset(0 0 62% 0)', offset:0.44 },
+        { transform:'translate(0,0)', filter:'none', clipPath:'inset(0 0 0 0)', offset:0.55 },
+        { transform:'translate(2px,1px)', filter:'hue-rotate(20deg)', clipPath:'inset(28% 0 22% 0)', offset:0.72 },
+        { transform:'translate(0,0)', filter:'none', clipPath:'inset(0 0 0 0)', offset:1 },
+      ];
+    }
+    const anim = sqEl.animate(keyframes, { duration: dur, easing:'ease-in-out', fill:'forwards' });
+    setTimeout(onMidSwap, dur*0.5);
+    anim.onfinish = () => {
+      sqEl.style.transform=''; sqEl.style.filter=''; sqEl.style.clipPath='';
+      resolve();
+    };
+  });
+}
+
 function renderDock(){
   const dock = document.getElementById('dock');
   dock.innerHTML = '';
@@ -172,6 +265,17 @@ function renderWordScreen(word){
   });
 }
 
+/* ---------- фикс реальной высоты экрана для Safari (адресная строка/safe area) ---------- */
+function setAppHeight(){
+  document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+}
+setAppHeight();
+window.addEventListener('resize', setAppHeight);
+window.addEventListener('orientationchange', setAppHeight);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', setAppHeight);
+}
+
 /* ---------- init ---------- */
 renderStaticScreen(document.getElementById('screen1'), SCREEN1_APPS);
 renderStaticScreen(document.getElementById('screen2'), SCREEN2_APPS);
@@ -190,6 +294,8 @@ function showPhoneView(){
   stepDot1.classList.remove('active');
   stepDot2.classList.add('active');
   localStorage.setItem('lastView', 'phone');
+  document.body.classList.add('lock-scroll');
+  document.body.classList.remove('show-back');
   // best-effort: настоящий полный экран без адресной строки на iPhone Safari
   // даёт только "Добавить на экран Домой" — см. README. Здесь пробуем то,
   // что поддерживают Android/десктоп браузеры.
@@ -202,8 +308,28 @@ function showInputView(){
   stepDot2.classList.remove('active');
   stepDot1.classList.add('active');
   localStorage.setItem('lastView', 'input');
+  document.body.classList.remove('lock-scroll');
+  document.body.classList.remove('show-back');
   if(document.fullscreenElement){ document.exitFullscreen().catch(()=>{}); }
 }
+
+/* ---------- секретный вызов кнопки "назад": тройной тап по верхней полосе ---------- */
+(function(){
+  const trigger = document.getElementById('secretBackTrigger');
+  let taps = [];
+  let hideTimer = null;
+  trigger.addEventListener('click', ()=>{
+    const now = Date.now();
+    taps = taps.filter(t => now - t < 600);
+    taps.push(now);
+    if(taps.length >= 3){
+      taps = [];
+      document.body.classList.add('show-back');
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(()=> document.body.classList.remove('show-back'), 4000);
+    }
+  });
+})();
 
 document.getElementById('goPhoneBtn').addEventListener('click', showPhoneView);
 document.getElementById('backBtn').addEventListener('click', showInputView);
@@ -243,7 +369,7 @@ const viewport = document.getElementById('viewport');
 const track = document.getElementById('track');
 const dots = document.querySelectorAll('#pageDots i');
 let activeIndex = 0;
-let startX = 0, currentDX = 0, dragging = false, viewportWidth = 0;
+let startX = 0, startY = 0, currentDX = 0, dragging = false, viewportWidth = 0;
 
 function setActive(idx, animate=true){
   activeIndex = Math.max(0, Math.min(2, idx));
@@ -253,14 +379,74 @@ function setActive(idx, animate=true){
   if(!animate) requestAnimationFrame(()=>{ track.style.transition=''; });
 }
 
-function pointerDown(x){
-  dragging = true; startX = x; currentDX = 0;
+/* ---------- долгое нажатие на экран 1: покачивание → свап real ↔ слово ---------- */
+const JIGGLE_DELAY = 350;     // когда начинается покачивание после касания (мс)
+const HOLD_TRIGGER = 2000;    // сколько всего держать, чтобы запустить свап (мс)
+const MOVE_CANCEL_PX = 10;    // если палец уехал дальше — это свайп, а не долгое нажатие
+
+let currentMode = 'real';     // 'real' | 'word'
+let swapping = false;
+let jiggleTimer = null, holdTimer = null, holdCancelled = false;
+
+function screen1Cells(){ return document.querySelectorAll('#screen1 .icon-cell'); }
+
+function setJiggle(on){
+  screen1Cells().forEach(c=>{
+    if(on){
+      c.style.setProperty('--jiggle-seed', (Math.random()*0.18 - 0.09).toFixed(3));
+    }
+    c.classList.toggle('jiggling', on);
+  });
+}
+
+function startHoldWatch(){
+  if(activeIndex !== 0 || swapping) return;
+  holdCancelled = false;
+  jiggleTimer = setTimeout(()=>{ if(!holdCancelled) setJiggle(true); }, JIGGLE_DELAY);
+  holdTimer = setTimeout(()=>{ if(!holdCancelled) triggerSwap(); }, HOLD_TRIGGER);
+}
+function cancelHoldWatch(){
+  holdCancelled = true;
+  clearTimeout(jiggleTimer);
+  clearTimeout(holdTimer);
+  if(!swapping) setJiggle(false);
+}
+
+async function triggerSwap(){
+  swapping = true;
+  const goingToWord = currentMode === 'real';
+  const cells = [...screen1Cells()];
+  const targetApps = goingToWord
+    ? buildWordAppsForSlots(document.getElementById('wordInput').value, cells.length)
+    : SCREEN1_APPS;
+
+  await Promise.all(cells.map((cell, i) => new Promise(res=>{
+    const delay = Math.random() * 180;
+    setTimeout(async ()=>{
+      const sq = cell.querySelector('.icon-squircle');
+      const effect = EFFECT_POOL[Math.floor(Math.random()*EFFECT_POOL.length)];
+      await animateIconSwap(sq, effect, ()=> applyAppToCell(cell, targetApps[i]));
+      res();
+    }, delay);
+  })));
+
+  currentMode = goingToWord ? 'word' : 'real';
+  setJiggle(false);
+  swapping = false;
+}
+
+function pointerDown(x, y){
+  dragging = true; startX = x; startY = y; currentDX = 0;
   viewportWidth = viewport.getBoundingClientRect().width;
   track.style.transition = 'none';
+  startHoldWatch();
 }
-function pointerMove(x){
+function pointerMove(x, y){
   if(!dragging) return;
   currentDX = x - startX;
+  if(!holdCancelled && (Math.abs(currentDX) > MOVE_CANCEL_PX || Math.abs(y-startY) > MOVE_CANCEL_PX)){
+    cancelHoldWatch();
+  }
   const base = -activeIndex * viewportWidth;
   let next = base + currentDX;
   const min = -2*viewportWidth, max = 0;
@@ -271,6 +457,7 @@ function pointerMove(x){
 function pointerUp(){
   if(!dragging) return;
   dragging = false;
+  cancelHoldWatch();
   const threshold = viewportWidth * 0.18;
   if(Math.abs(currentDX) > threshold){
     setActive(activeIndex + (currentDX < 0 ? 1 : -1));
@@ -279,8 +466,8 @@ function pointerUp(){
   }
 }
 
-viewport.addEventListener('pointerdown', (e)=>{ pointerDown(e.clientX); viewport.setPointerCapture(e.pointerId); });
-viewport.addEventListener('pointermove', (e)=> pointerMove(e.clientX));
+viewport.addEventListener('pointerdown', (e)=>{ pointerDown(e.clientX, e.clientY); viewport.setPointerCapture(e.pointerId); });
+viewport.addEventListener('pointermove', (e)=> pointerMove(e.clientX, e.clientY));
 viewport.addEventListener('pointerup', pointerUp);
 viewport.addEventListener('pointercancel', pointerUp);
 
