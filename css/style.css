@@ -5,7 +5,8 @@
   --squircle: polygon(50% 0%, 61.8% 0.6%, 71.9% 2.5%, 80.3% 5.8%, 86.7% 10.3%, 91.4% 15.9%, 94.6% 22.6%, 96.7% 30.2%, 98% 38.6%, 98.8% 47.7%, 99% 50%, 98.8% 52.3%, 98% 61.4%, 96.7% 69.8%, 94.6% 77.4%, 91.4% 84.1%, 86.7% 89.7%, 80.3% 94.2%, 71.9% 97.5%, 61.8% 99.4%, 50% 100%, 38.2% 99.4%, 28.1% 97.5%, 19.7% 94.2%, 13.3% 89.7%, 8.6% 84.1%, 5.4% 77.4%, 3.3% 69.8%, 2% 61.4%, 1.2% 52.3%, 1% 50%, 1.2% 47.7%, 2% 38.6%, 3.3% 30.2%, 5.4% 22.6%, 8.6% 15.9%, 13.3% 10.3%, 19.7% 5.8%, 28.1% 2.5%, 38.2% 0.6%);
 }
 *{box-sizing:border-box;}
-html,body{ height:100%; }
+html,body{ height:100%; overscroll-behavior:none; }
+body.lock-scroll{ position:fixed; inset:0; width:100%; overflow:hidden; touch-action:none; }
 body{
   margin:0; min-height:100%;
   background:
@@ -141,6 +142,23 @@ input[type=text]:focus{ border-color:var(--gold); }
   font-family:-apple-system,'SF Pro Rounded','SF Pro Text',sans-serif;
   font-weight:800; font-size:28px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.25);
 }
+.icon-squircle.is-blank{ box-shadow:none; opacity:0; pointer-events:none; }
+
+/* ---------- iOS-style edit-mode wiggle (долгое нажатие) ---------- */
+@keyframes iosWiggle{
+  0%,100%{ transform:rotate(-1.4deg); }
+  50%{ transform:rotate(1.4deg); }
+}
+.icon-cell.jiggling .icon-squircle{
+  animation:iosWiggle .24s ease-in-out infinite;
+  animation-delay: calc(var(--jiggle-seed, 0) * 1s);
+}
+.icon-cell.jiggling .icon-squircle::before{
+  content:'−'; position:absolute; top:-6px; left:-6px; width:19px; height:19px;
+  background:#ff3b30; border-radius:50%; color:#fff; font-size:15px; line-height:19px;
+  text-align:center; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,0.45);
+  z-index:5; animation:none;
+}
 
 .page-dots{
   position:absolute; bottom:104px; left:0; right:0; z-index:20;
@@ -157,6 +175,14 @@ input[type=text]:focus{ border-color:var(--gold); }
 }
 .dock .icon-squircle{ width:60px; height:60px; }
 
+/* Home Indicator — тонкая плашка снизу, есть на КАЖДОМ экране iPhone X и новее.
+   Без неё экран визуально считывается как "не настоящий". */
+.home-indicator{
+  position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+  width:134px; height:5px; border-radius:3px;
+  background:rgba(255,255,255,0.85); z-index:40; pointer-events:none;
+}
+
 .phone-hint{ margin-top:18px; font-size:11.5px; color:var(--ink-dim); text-align:center; max-width:340px; line-height:1.6; }
 .phone-hint b{ color:var(--teal); }
 
@@ -170,21 +196,31 @@ footer{ margin-top:44px; font-size:11px; color:#4d4a5c; text-align:center; max-w
 @media (max-width: 500px){
   #viewPhone.view.active{
     position:fixed; inset:0; z-index:100;
+    height: var(--app-height, 100dvh);
     padding:0; margin:0; background:#000;
   }
   .phone-stage{ height:100%; }
+  /* Кнопка "назад" по умолчанию СКРЫТА — на настоящем экране её быть не должно.
+     Появляется только на несколько секунд после тройного тапа по верхней
+     части экрана (см. секретный триггер в js/app.js). */
   .backlink{
     position:absolute; top:calc(env(safe-area-inset-top,0px) + 8px); left:12px; z-index:200;
-    background:rgba(0,0,0,0.35); padding:6px 12px; border-radius:20px; margin:0;
+    background:rgba(0,0,0,0.55); padding:6px 12px; border-radius:20px; margin:0;
     backdrop-filter: blur(4px);
+    opacity:0; pointer-events:none; transition:opacity .25s;
   }
+  body.show-back .backlink{ opacity:1; pointer-events:auto; }
   .phone-frame{
-    width:100vw; height:100dvh; padding:0; border-radius:0;
+    width:100vw; height:calc(var(--app-height, 100dvh)); padding:0; border-radius:0;
     box-shadow:none; background:none;
   }
   .phone-screen{ border-radius:0; height:100%; }
   .phone-hint{ display:none; }
   footer{ display:none; }
+}
+/* Невидимая зона для тройного тапа — вызов кнопки "назад" (верхняя полоса экрана) */
+.secret-back-trigger{
+  position:absolute; top:0; left:0; right:0; height:64px; z-index:35;
 }
 
 /* Запущено как установленное на "Домой" приложение (без Safari UI):
@@ -196,4 +232,5 @@ footer{ margin-top:44px; font-size:11px; color:#4d4a5c; text-align:center; max-w
   .home-screen{ padding-top: calc(env(safe-area-inset-top,0px) + 16px); }
   .dock{ bottom: calc(env(safe-area-inset-bottom,0px) + 8px); }
   .page-dots{ bottom: calc(env(safe-area-inset-bottom,0px) + 96px); }
+  .home-indicator{ bottom: calc(env(safe-area-inset-bottom,0px) + 6px); }
 }
