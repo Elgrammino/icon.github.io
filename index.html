@@ -2,12 +2,16 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Слово из иконок</title>
 
+<!-- PWA / «На экран Домой» -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Иконки">
+<meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icons/app-icon.png">
 
@@ -19,98 +23,90 @@
 <div class="app">
 
   <h1>Слово из иконок</h1>
-  <div class="sub">Введи слово и открой экран. Дальше — только жесты: два пальца сверху вниз возвращают сюда.</div>
+  <div class="sub">Симулятор экрана «Домой» iPhone: три страницы, как при обычном свайпе. Слово превращается в иконки-буквы на третьей странице.</div>
 
-  <!-- ===== СТРАНИЦА ВВОДА ===== -->
+  <div class="steps">
+    <div class="step-dot active" id="stepDot1">① Слово</div>
+    <div class="step-dot" id="stepDot2">② Телефон</div>
+  </div>
+
+  <!-- ===== VIEW 1: НАСТРОЙКА ===== -->
   <div class="view active" id="viewInput">
     <div class="panel">
-      <h2>Слово</h2>
-      <div class="hint-sm">Каждая буква заменит одну иконку на третьем экране. Остальные иконки останутся на местах.</div>
-      <input type="text" id="wordInput" value="МАГИЯ" maxlength="12" autocomplete="off" autocapitalize="characters">
+      <h2>Настройка</h2>
+      <div class="hint-sm">Пробел в слове оставляет пустую клетку. Слово можно задать и ссылкой: <code>?word=МАГИЯ</code>.</div>
 
-      <h2>Картинки</h2>
-      <label class="fld">Обои домашнего экрана</label>
+      <label for="wordInput">Слово</label>
+      <input type="text" id="wordInput" value="МАГИЯ" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false">
+
+      <label>Обои телефона (необязательно)</label>
       <label class="filebtn" id="wallLabel">
-        <span>🖼 Загрузить обои</span>
+        <span id="wallText">🖼 Загрузить фон</span>
         <input type="file" id="wallInput" accept="image/*">
       </label>
+      <button type="button" class="linkbtn" id="wallReset" hidden>Сбросить обои</button>
 
-      <label class="fld">Фальшивый снимок для меню многозадачности</label>
-      <div class="hint-sm" style="margin-bottom:0">Подменяется в момент сворачивания — в карточке приложений будет видна эта картинка, а не домашний экран.</div>
-      <label class="filebtn" id="fakeLabel">
-        <span>🎮 Загрузить снимок</span>
-        <input type="file" id="fakeInput" accept="image/*">
-      </label>
+      <button type="button" class="btn" id="goPhoneBtn">Показать на телефоне →</button>
 
-      <h2>Бейджи</h2>
-      <div class="hint-sm">Красные счётчики на иконках. 0 — бейджа нет.</div>
-      <div class="badge-list" id="badgeList"></div>
-
-      <button class="btn" id="goPhoneBtn">Открыть экран →</button>
+      <div class="hint-sm secret">Вернуться сюда с экрана телефона: <b>три быстрых тапа по верхней полоске</b> (где часы). Зритель кнопку «назад» не видит.</div>
     </div>
   </div>
 
-  <!-- ===== ЭКРАН ТЕЛЕФОНА ===== -->
+  <!-- ===== VIEW 2: ТЕЛЕФОН ===== -->
   <div class="view" id="viewPhone">
     <div class="phone-stage">
+      <button type="button" class="backlink" id="backBtn">← назад к слову</button>
+
       <div class="phone-frame">
-        <div class="phone-screen" id="phoneScreen">
-          <div class="wallpaper-layer" id="wallpaperLayer"></div>
+        <div class="phone-screen" id="screen">
+          <div class="wallpaper" id="wallpaper"></div>
 
-          <div class="status-bar">
-            <span id="sbClock">9:41</span>
-            <div class="status-right">
-              <div class="bars"><i></i><i></i><i></i><i></i></div>
-              <svg viewBox="0 0 17 13" fill="none" style="width:calc(17*var(--pt));height:calc(13*var(--pt))">
-                <path d="M8.5 11.2a1.1 1.1 0 100-2.2 1.1 1.1 0 000 2.2z" fill="#fff"/>
-                <path d="M5.6 7.6a4.4 4.4 0 015.8 0" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/>
-                <path d="M2.8 4.6a8.8 8.8 0 0111.4 0" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-              <div class="batt"></div>
+          <div class="home" id="home">
+            <div class="pager" id="pager">
+              <div class="track" id="track"></div>
+            </div>
+
+            <div class="indicator" id="indicator" data-mode="search">
+              <div class="pill ind-search">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.9" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M10.4 10.4l3.9 3.9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+                <span>Поиск</span>
+              </div>
+              <div class="pill ind-dots" id="dots"></div>
+            </div>
+
+            <div class="dock" id="dock"></div>
+          </div>
+
+          <div class="edit-bar" id="editBar">
+            <button type="button" class="pill">Изменить</button>
+            <button type="button" class="pill" id="doneBtn">Готово</button>
+          </div>
+
+          <div class="menu-layer" id="menuLayer"></div>
+          <div class="app-layer" id="appLayer"></div>
+
+          <!-- нарисованный статус-бар: только в режиме мокапа на компьютере.
+               На настоящем iPhone сверху уже есть системный. -->
+          <div class="island" aria-hidden="true"></div>
+          <div class="sb" id="statusBar" aria-hidden="true">
+            <div class="sb-left"><span id="sbTime">9:41</span></div>
+            <div class="sb-gap"></div>
+            <div class="sb-right">
+              <svg class="sb-signal" viewBox="0 0 18 12"><rect x="0" y="7.5" width="3" height="4.5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+              <svg class="sb-wifi" viewBox="0 0 16 12"><path d="M8 2.3c2.3 0 4.4.9 6 2.4l1.1-1.2A10.2 10.2 0 0 0 8 .6 10.2 10.2 0 0 0 .9 3.5L2 4.7a8.6 8.6 0 0 1 6-2.4Zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.1-1.2A6.9 6.9 0 0 0 8 4a6.9 6.9 0 0 0-4.7 1.9l1.1 1.2c1-.9 2.2-1.4 3.6-1.4Zm0 3.3c.5 0 1 .2 1.3.5L8 11.4 6.7 9.5c.3-.3.8-.5 1.3-.5Z"/></svg>
+              <div class="sb-batt"><i id="sbBatt"></i></div>
             </div>
           </div>
-
-          <div class="screens-viewport" id="viewport">
-            <div class="screens-track" id="track">
-              <div class="home-screen" id="screen0"></div>
-              <div class="home-screen" id="screen1"></div>
-              <div class="home-screen" id="screen2"></div>
-            </div>
-          </div>
-
-          <div class="page-dots" id="pageDots"><i class="active"></i><i></i><i></i></div>
-
-          <div class="search-pill">
-            <svg viewBox="0 0 16 16" fill="none">
-              <circle cx="7" cy="7" r="5" stroke="#fff" stroke-width="1.8"/>
-              <path d="M11 11l3.5 3.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-            <span>Поиск</span>
-          </div>
-
-          <div class="dock" id="dock"></div>
-          <div class="home-indicator"></div>
-
-          <button class="done-btn" id="doneBtn">Готово</button>
-
-          <div class="trigger-zone" id="zonePrimary"><input type="checkbox" switch></div>
-          <div class="trigger-zone" id="zoneBackup"><input type="checkbox" switch></div>
         </div>
       </div>
 
-      <div class="phone-hint">
-        Порядок: <b>1-е касание зоны</b> — режим редактирования, <b>2-е</b> — превращение в слово,
-        <b>3-е</b> — возврат обычных иконок. Затем сворачиваешь свайпом сам.
-      </div>
+      <div class="phone-hint">Свайпни влево — на третьей странице иконки сложатся в слово <b id="wordEcho">МАГИЯ</b>. Тап — открыть приложение, долгое нажатие — меню.</div>
     </div>
   </div>
 
-  <footer>Метрики под iPhone 15 Pro Max: сетка 4×6, иконка 64pt. Правится в js/config.js. Подробности — в README.md.</footer>
+  <footer>Работает локально и офлайн. Чтобы у зрителя не было адресной строки Safari — открывай через «На экран Домой» (см. README.md).</footer>
 </div>
 
-<div class="fake-cover" id="fakeCover"></div>
-
-<script src="js/config.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
