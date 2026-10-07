@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calculator</title>
+    <meta charset="utf-8">
+    <meta name="application-name" content="Calculator">
+    <meta name="description" content="Talc Powder App" />
+    <meta name="copyright" content="&copy; 2020 Michael Stark">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-title" content="Calculator">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="msapplication-starturl" content="/">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" href="../images/icon-512.png">
+    <link rel="apple-touch-icon" href="../images/icon-512.png">
+    <script>
+        // classic interface (before iOS 26). Chosen on the instructions page, otherwise go to the new one
+        try {
+            if (localStorage.getItem("ui") !== "classic") {
+                window.location.replace("../" + window.location.search);
+            }
+        } catch (e) { }
+    </script>
+    <link rel="stylesheet" href="./css/main.css">
+    <script defer src="../js/version.js"></script>
+    <script defer src="../js/i18n/i18n_en.js"></script>
+    <script defer src="../js/i18n/i18n_ru.js"></script>
+    <script defer src="../js/i18n/i18n.js"></script>
+    <script defer src="../js/i18n/i18nextBrowserLanguageDetector.min.js"></script>
+    <script defer src="../js/i18n/i18next.js"></script>
+    <script defer src="../js/peerjs.min.js"></script>
+    <script defer src="./js/calculator.js"></script>
+    <script defer src="../js/magic.js"></script>
+    <script defer src="../js/rc.js"></script>
+</head>
+
+<body>
+    <div id="loading" class="hidden">
+        <div id="spinner"></div>
+    </div>
+    <div id="overlayDDF" class="hidden"></div>
+    <div id="calc">
+        <div class="calcOffset"></div>
+        <div class="row">
+            <div class="displayS1" id="display">0</div>
+        </div>
+        <div class="row">
+            <div class="button pushOff" id="c">AC</div>
+            <div class="button pushOff" id="+-">
+                <!-- ⁺⁄₋ additional variant -->
+                <sup>+</sup>⁄<sub>−</sub>
+            </div>
+            <div class="button pushOff" id="%">%</div>
+            <div class="button operation pushOff" id="÷">÷</div>
+        </div>
+        <div class="row">
+            <div class="button digit pushOff" id="7">7</div>
+            <div class="button digit pushOff" id="8">8</div>
+            <div class="button digit pushOff" id="9">9</div>
+            <div class="button operation pushOff" id="x">×</div>
+        </div>
+        <div class="row">
+            <div class="button digit pushOff" id="4">4</div>
+            <div class="button digit pushOff" id="5">5</div>
+            <div class="button digit pushOff" id="6">6</div>
+            <div class="button operation pushOff" id="-">−</div>
+        </div>
+        <div class="row">
+            <div class="button digit pushOff" id="1">1</div>
+            <div class="button digit pushOff" id="2">2</div>
+            <div class="button digit pushOff" id="3">3</div>
+            <div class="button operation pushOff" id="+">+</div>
+        </div>
+        <div class="row">
+            <div class="button digit pushOff" id="0">0</div>
+            <div class="button digit pushOff" id="."></div>
+            <div class="button operation pushOff" id="=">=</div>
+        </div>
+        <div class="calcOffset"></div>
+    </div>
+</body>
+
+</html>

@@ -1,5 +1,10 @@
 const i18n_ru = {
     "translation": {
+        "interface": "Вид калькулятора",
+        "interfaceNew": "iOS 26",
+        "interfaceClassic": "Классический",
+        "interfaceHint": "Классический повторяет калькулятор iPhone до iOS 26. Выберите его, если на телефоне старая версия iOS.",
+        "saved": "Сохранено. Откройте калькулятор",
         "donate": "Поддержать автора",
         "backToCalculator": "Калькулятор",
         "backToContents": "Все функции",

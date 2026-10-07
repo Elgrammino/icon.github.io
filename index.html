@@ -18,6 +18,14 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="./images/icon-512.png">
     <link rel="apple-touch-icon" href="./images/icon-512.png">
+    <script>
+        // classic interface (before iOS 26) is chosen on the instructions page and lives in ./old/
+        try {
+            if (localStorage.getItem("ui") === "classic") {
+                window.location.replace("./old/" + window.location.search);
+            }
+        } catch (e) { }
+    </script>
     <link rel="stylesheet" href="./css/main.css">
     <script defer src="./js/version.js"></script>
     <script defer src="./js/i18n/i18n_en.js"></script>

@@ -1,5 +1,10 @@
 const i18n_en = {
     "translation": {
+        "interface": "Calculator look",
+        "interfaceNew": "iOS 26",
+        "interfaceClassic": "Classic",
+        "interfaceHint": "Classic matches the iPhone calculator before iOS 26. Pick it if the phone runs an older iOS.",
+        "saved": "Saved. Open the calculator",
         "donate": "Support the author",
         "backToCalculator": "Calculator",
         "backToContents": "All functions",
