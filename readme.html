@@ -58,7 +58,7 @@
             document.body.innerHTML += i18next.t(!!params.part ? `readme_part_${params.part}` : "readme");
             let link = document.querySelector("a#link");
             if (link) {
-                link.href = window.location.origin + "/calculator/?hostPeerId=" + localStorage.getItem("currentPeerId");
+                link.href = new URL("./?hostPeerId=" + localStorage.getItem("currentPeerId"), window.location.href).href;
                 link.onpointerdown = _ => navigator.clipboard.writeText(link.href);
             }
         });

@@ -536,12 +536,15 @@ function calculateOperation(nextOperation) {
         expressionText += operationSymbols[nextOperation];
     } else {
         let isStart = !isOperationPending();
+        // DDF armed and "+" on an untouched 0: no "0+" on screen, forced digits look freshly typed
+        let isSilentStart = !!magicDDFResult && nextOperation === "+" && operation === "" && !isDigitsTyping && inputValue === "0";
         let operandText = isDigitsTyping || operation === "" ? inputValue : calcSum.toString();
         let value = Number(operandText);
         undoState = { calcSum, calcTerm, operation, expressionText: isStart ? "" : expressionText };
         applyOperand(value, nextOperation);
         lastOperand = value;
-        expressionText = (isStart ? "" : expressionText) + formatOperand(operandText) + operationSymbols[nextOperation];
+        expressionText = isSilentStart ? ""
+            : (isStart ? "" : expressionText) + formatOperand(operandText) + operationSymbols[nextOperation];
     }
     let pendingOperation = operation;
     operation = nextOperation;
@@ -614,7 +617,7 @@ function deleteLastDigit() {
 function displayValue(value, showAsIs = false) {
     if (isOperationPending()) {
         // iOS: the expression keeps full size, its start is cut off with a fade
-        displayEl.innerText = expressionText + (isDigitsTyping ? formatOperand(value) : "");
+        displayEl.innerText = expressionText + (isDigitsTyping ? formatOperand(value) : "") || "0";
         displayEl.className = "displayS1";
         displayEl.classList.toggle("clipped", isTextOverflowing(displayEl));
         return;

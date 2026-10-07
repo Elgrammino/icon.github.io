@@ -393,7 +393,7 @@ body {
     box-shadow:
         inset 0 0.05rem 0.05rem rgb(255 255 255 / 22%),
         inset 0 0 0 0.04rem rgb(255 255 255 / 10%);
-    transition: transform 0.08s ease-out, background-color 0.1s ease-out;
+    transition: transform 0.08s ease-out, background-color 0.1s ease-out, box-shadow 0.1s ease-out;
 }
 
 #historyKey {
@@ -417,26 +417,31 @@ body {
     box-shadow: inset 0 0.05rem 0.05rem rgb(255 255 255 / 40%);
 }
 
-/* ---------- magic / remote control feedback ---------- */
+/* ---------- magic / remote control feedback ----------
+   magic.js / rc.js put these classes on <body>; instead of a glow around the screen
+   the top keys light up: history key = magic action, calculator key = remote control state */
 
-.magicAlarm {
-    box-shadow: inset 0 0 10px #FFF !important;
+.magicAlarm #historyKey {
+    background-color: #8E8E93;
+    box-shadow:
+        inset 0 0.05rem 0.05rem rgb(255 255 255 / 50%),
+        0 0 0.9rem rgb(255 255 255 / 55%);
 }
 
 .hidden {
     display: none;
 }
 
-.rcReady {
-    box-shadow: inset 0 0 10px #00FF00;
+.rcReady #modeKey {
+    box-shadow: inset 0 0 0 0.12rem #30D158, 0 0 0.7rem rgb(48 209 88 / 55%);
 }
 
-.rcWait {
-    box-shadow: inset 0 0 10px #ffd500;
+.rcWait #modeKey {
+    box-shadow: inset 0 0 0 0.12rem #FFD60A, 0 0 0.7rem rgb(255 214 10 / 55%);
 }
 
-.rcLoose {
-    box-shadow: inset 0 0 10px #FF0000;
+.rcLoose #modeKey {
+    box-shadow: inset 0 0 0 0.12rem #FF453A, 0 0 0.7rem rgb(255 69 58 / 55%);
 }
 
 @media (prefers-reduced-motion: reduce) {
