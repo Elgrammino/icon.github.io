@@ -1,0 +1,434 @@
+@font-face {
+    font-family: 'SFMono';
+    src: url('../fonts/SFMono-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SFProDisplay';
+    src: url('../fonts/SFProDisplay-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SFProDisplay';
+    src: url('../fonts/SFProDisplay-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SFProDisplay';
+    src: url('../fonts/SFProDisplay-Semibold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@keyframes loading {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* iOS 26 Calculator palette */
+:root {
+    --bg: #000;
+    --text: #FFF;
+    --text-secondary: #8D8D93;
+    --key-digit: #2E2E30;
+    --key-digit-pressed: #6E6E73;
+    --key-util: #5C5C5F;
+    --key-util-pressed: #9A9A9F;
+    --key-operation: #FF9500;
+    --key-operation-pressed: #FFC266;
+    --font: -apple-system, 'SFProDisplay', system-ui, sans-serif;
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --icon-backspace: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.2 5h9.6a2.4 2.4 0 0 1 2.4 2.4v9.2a2.4 2.4 0 0 1-2.4 2.4H9.2a2 2 0 0 1-1.5-.7L2.8 12l4.9-6.3A2 2 0 0 1 9.2 5z'/%3E%3Cpath d='M11.6 9.3l5.4 5.4M17 9.3l-5.4 5.4'/%3E%3C/svg%3E");
+}
+
+* {
+    touch-action: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    transition: box-shadow 0.2s ease-in-out;
+    background-color: var(--bg);
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: min(2.72vh, 4.15vw);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+#spinner {
+    animation: loading 1s linear infinite;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    width: 4rem;
+    height: 4rem;
+    border: 0.5rem solid #FFF;
+    border-top-color: transparent;
+    border-radius: 50%;
+}
+
+#loading {
+    box-shadow: inherit;
+    position: absolute;
+    z-index: 20;
+    width: 100%;
+    height: 100%;
+    background: rgb(0 0 0 / 90%);
+}
+
+/* must stay above the keys: they are positioned for the glass layers */
+#overlayDDF {
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+}
+
+#calc {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    max-width: 23.2rem;
+    height: 100%;
+    margin: auto;
+}
+
+/* ---------- display ---------- */
+
+.displayArea {
+    padding: 0 0.75rem 0.6rem;
+}
+
+#expression {
+    display: flex;
+    justify-content: flex-end;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 2.6rem;
+    height: 2.6rem;
+}
+
+#display {
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: 300;
+    text-align: right;
+    line-height: 6.6rem;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+}
+
+.displayS1 {
+    font-size: 5.6rem;
+}
+
+.displayS2 {
+    font-size: 4.8rem;
+}
+
+.displayS3 {
+    font-size: 4.2rem;
+}
+
+.displayS4 {
+    font-size: 3.6rem;
+}
+
+.displayS5 {
+    font-size: 3.1rem;
+}
+
+.displayS6 {
+    font-size: 2.6rem;
+}
+
+.displayS7 {
+    font-size: 2.2rem;
+}
+
+.displayS8 {
+    font-size: 1.8rem;
+}
+
+.displayS9 {
+    font-size: 1.5rem;
+}
+
+.displayS10 {
+    font-size: 1.25rem;
+}
+
+.displayS11 {
+    font-size: 1rem;
+}
+
+.calcOffset {
+    height: calc(3.4rem + env(safe-area-inset-bottom));
+}
+
+/* ---------- keys: Liquid Glass ---------- */
+
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.button,
+#modeKey {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    margin: 0.4rem;
+    border-radius: 50%;
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 2.55rem;
+    line-height: 1;
+    background-color: var(--key-digit);
+    /* glass rim: bright top edge, faint bottom bounce light, hairline border */
+    box-shadow:
+        inset 0 0.07rem 0.06rem rgb(255 255 255 / 32%),
+        inset 0 -0.07rem 0.1rem rgb(255 255 255 / 10%),
+        inset 0 0 0 0.04rem rgb(255 255 255 / 9%);
+    transform: scale(1);
+}
+
+/* specular sheen across the glass */
+.button::before,
+#modeKey::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+        radial-gradient(120% 80% at 50% -10%, rgb(255 255 255 / 16%), transparent 55%),
+        radial-gradient(90% 60% at 50% 115%, rgb(255 255 255 / 6%), transparent 60%);
+    pointer-events: none;
+}
+
+.button svg,
+.glassKey svg {
+    position: relative;
+    pointer-events: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.button svg .fill,
+.glassKey svg .fill {
+    fill: currentColor;
+    stroke: none;
+}
+
+.util {
+    background-color: var(--key-util);
+    font-size: 2.3rem;
+    font-weight: 500;
+}
+
+.digit {
+    background-color: var(--key-digit);
+}
+
+.operation {
+    background-color: var(--key-operation);
+}
+
+.operation svg {
+    width: 2.25rem;
+    height: 2.25rem;
+    stroke-width: 2.3;
+}
+
+[id="+-"] svg {
+    width: 2.4rem;
+    height: 2.4rem;
+    stroke-width: 2.1;
+}
+
+#modeKey svg {
+    width: 2.2rem;
+    height: 2.2rem;
+    stroke-width: 1.7;
+}
+
+/* AC / backspace key: the label is drawn by CSS, the text node keeps the "AC"/"C" state for the scripts */
+#c {
+    font-size: 0;
+}
+
+#c::after {
+    content: "AC";
+    position: relative;
+    font-size: 2.05rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+#c.backspace::after {
+    content: "";
+    width: 2.45rem;
+    height: 2.45rem;
+    background-color: currentColor;
+    -webkit-mask: var(--icon-backspace) center / contain no-repeat;
+    mask: var(--icon-backspace) center / contain no-repeat;
+}
+
+/* numerology result on % (sup⁄sub) */
+[id="%"]>* {
+    position: relative;
+    font-size: 1.15rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+[id="%"]>sup {
+    align-self: flex-start;
+    margin-top: 1.25rem;
+}
+
+[id="%"]>sub {
+    align-self: flex-end;
+    margin-bottom: 1.25rem;
+}
+
+/* press: the glass swells and lights up, then springs back */
+.pushOff {
+    transition:
+        transform 0.55s var(--spring),
+        background-color 0.45s ease-out,
+        box-shadow 0.45s ease-out;
+}
+
+.pushDigit,
+.pushUtil,
+.pushOperation {
+    transform: scale(1.1);
+    transition:
+        transform 0.16s ease-out,
+        background-color 0.08s linear,
+        box-shadow 0.08s linear;
+    box-shadow:
+        inset 0 0.08rem 0.1rem rgb(255 255 255 / 55%),
+        inset 0 -0.08rem 0.14rem rgb(255 255 255 / 22%),
+        inset 0 0 0 0.05rem rgb(255 255 255 / 22%),
+        0 0.6rem 1.6rem rgb(0 0 0 / 45%);
+}
+
+.pushDigit {
+    background-color: var(--key-digit-pressed);
+}
+
+.pushUtil {
+    background-color: var(--key-util-pressed);
+}
+
+.pushOperation {
+    background-color: var(--key-operation-pressed);
+}
+
+/* ---------- top-left history glass button ---------- */
+
+#historyKey {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 0.9rem);
+    left: max(1rem, calc(50% - 11.2rem));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 50%;
+    color: var(--text);
+    background-color: rgb(255 255 255 / 9%);
+    box-shadow:
+        inset 0 0.06rem 0.06rem rgb(255 255 255 / 30%),
+        inset 0 0 0 0.04rem rgb(255 255 255 / 10%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    backdrop-filter: blur(12px) saturate(160%);
+    transition: transform 0.5s var(--spring), background-color 0.3s ease-out;
+}
+
+#historyKey svg {
+    width: 1.45rem;
+    height: 1.45rem;
+    stroke-width: 2;
+}
+
+#historyKey.pushDigit {
+    transform: scale(1.12);
+    background-color: rgb(255 255 255 / 22%);
+    box-shadow: inset 0 0.06rem 0.06rem rgb(255 255 255 / 45%);
+}
+
+/* ---------- magic / remote control feedback ---------- */
+
+.magicAlarm {
+    box-shadow: inset 0 0 10px #FFF !important;
+}
+
+.hidden {
+    display: none;
+}
+
+.rcReady {
+    box-shadow: inset 0 0 10px #00FF00;
+}
+
+.rcWait {
+    box-shadow: inset 0 0 10px #ffd500;
+}
+
+.rcLoose {
+    box-shadow: inset 0 0 10px #FF0000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pushOff,
+    #historyKey {
+        transition: background-color 0.3s linear;
+    }
+
+    .pushDigit,
+    .pushUtil,
+    .pushOperation,
+    #historyKey.pushDigit {
+        transform: none;
+    }
+}

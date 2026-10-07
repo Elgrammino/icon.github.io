@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @font-face {
+            font-family: 'SFMono';
+            src: url('./fonts/SFMono-Light.woff2') format('woff2');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            margin: 10px;
+            background-color: #3C3F41;
+            color: #DFDFDF;
+            font-family: 'SFMono';
+            font-size: 15px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+        }
+
+        a {
+            display: block;
+            color: #8caacc;
+            margin: 1rem 0;
+        }
+
+        a.inline {
+            display: inline;
+            margin: auto;
+        }
+    </style>
+    <script src="./js/version.js"></script>
+    <script src="./js/i18n/i18n_en.js"></script>
+    <script src="./js/i18n/i18n_ru.js"></script>
+    <script src="./js/i18n/i18n.js"></script>
+    <script src="./js/i18n/i18nextBrowserLanguageDetector.min.js"></script>
+    <script src="./js/i18n/i18next.js"></script>
+</head>
+
+<body>
+    <div style="text-align: center;"><strong>Talc Powder App
+            v<script>document.write(version);</script><br />
+        </strong>&copy; 2020 Michael Stark
+        <form action="https://www.paypal.com/donate" method="post" target="_top">
+            <input type="hidden" name="hosted_button_id" value="QJGGN9PQFPFN6" />
+            <input type="image" src="images/donate-button.png" />
+        </form>
+    </div>
+    <script>
+        i18next.use(i18nextBrowserLanguageDetector).init(i18n).then(_ => {
+            const params = new Proxy(new URLSearchParams(window.location.search), {
+                get: (searchParams, prop) => searchParams.get(prop),
+            });
+            document.body.innerHTML += i18next.t(!!params.part ? `readme_part_${params.part}` : "readme");
+            let link = document.querySelector("a#link");
+            if (link) {
+                link.href = window.location.origin + "/calculator/?hostPeerId=" + localStorage.getItem("currentPeerId");
+                link.onpointerdown = _ => navigator.clipboard.writeText(link.href);
+            }
+        });
+    </script>
+</body>
+
+</html>
