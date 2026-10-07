@@ -334,7 +334,7 @@ function btnHandler(target) {
             if (operation === "=") {
                 add2MagicHistory("\n");
                 operation = "";
-                expressionEl.innerText = "";
+                setExpressionLine("");
             }
             add2MagicHistory(inputValue);
         }
@@ -428,10 +428,10 @@ function btnHandler(target) {
                         expressionLine = formatOperand(resultValue.toString());
                     }
                     if (expressionLine !== null) {
-                        expressionEl.innerText = expressionLine;
+                        setExpressionLine(expressionLine);
                     }
                 } else {
-                    expressionEl.innerText = "";
+                    setExpressionLine("");
                 }
                 resetEl.innerText = "C";
                 isDigitsTyping = false;
@@ -613,15 +613,30 @@ function deleteLastDigit() {
 
 function displayValue(value, showAsIs = false) {
     if (isOperationPending()) {
+        // iOS: the expression keeps full size, its start is cut off with a fade
         displayEl.innerText = expressionText + (isDigitsTyping ? formatOperand(value) : "");
-    } else {
-        displayEl.innerText = formatValue(value, showAsIs);
+        displayEl.className = "displayS1";
+        displayEl.classList.toggle("clipped", isTextOverflowing(displayEl));
+        return;
     }
+    displayEl.innerText = formatValue(value, showAsIs);
     // calculate font
     let sizeIndex = 1;
     do {
         displayEl.className = "displayS" + sizeIndex;
     } while (sizeIndex++ < 12 && displayEl.scrollWidth > displayEl.clientWidth);
+}
+
+function setExpressionLine(text) {
+    expressionEl.innerText = text;
+    expressionEl.classList.remove("clipped");
+    expressionEl.classList.toggle("clipped", isTextOverflowing(expressionEl));
+}
+
+function isTextOverflowing(el) {
+    let range = document.createRange();
+    range.selectNodeContents(el);
+    return range.getBoundingClientRect().width > el.clientWidth + 1;
 }
 
 function getVisibleValue() {
@@ -635,7 +650,7 @@ function reset() {
     operation = "";
     isDigitsTyping = false;
     expressionText = "";
-    expressionEl.innerText = "";
+    setExpressionLine("");
     calcSum = 0;
     calcTerm = 0;
     lastOperand = 0;

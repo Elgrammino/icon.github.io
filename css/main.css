@@ -48,15 +48,18 @@
     --bg: #000;
     --text: #FFF;
     --text-secondary: #8E8E93;
-    --key-digit: #333335;
-    --key-digit-pressed: #737378;
-    --key-util: #5C5C5F;
-    --key-util-pressed: #9A9A9F;
-    --key-operation: #F29A36;
-    --key-operation-pressed: #F8C890;
-    --key-top: #1C1C1E;
+    /* sampled from iPhone screenshots and a 60 fps screen recording (sRGB) */
+    --key-digit: #343434;
+    --key-digit-pressed: #6A6A6A;
+    --key-util: #5D5D5D;
+    --key-util-pressed: #8E8E8E;
+    --key-operation: #FF9200;
+    --key-operation-pressed: #FFB700;
+    --key-top: #121212;
+    --key-top-pressed: #3A3A3C;
+    /* fade for the start of a long expression clipped on the left */
+    --clip-fade: linear-gradient(to right, transparent 0, #000 1.6rem);
     --font: -apple-system, 'SFProDisplay', system-ui, sans-serif;
-    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -152,6 +155,15 @@ body {
     overflow: hidden;
     white-space: nowrap;
     letter-spacing: -0.01em;
+}
+
+/* iOS keeps the expression at full size and cuts its start with a fade */
+#display.clipped,
+#expression.clipped {
+    display: flex;
+    justify-content: flex-end;
+    -webkit-mask-image: var(--clip-fade);
+    mask-image: var(--clip-fade);
 }
 
 .displayS1 {
@@ -321,22 +333,30 @@ body {
     margin-bottom: 1.2rem;
 }
 
-/* press: the glass swells and lights up, then springs back */
+/* press (from the 60 fps recording): grows ~13% and lights up in ~3 frames,
+   on release shrinks back in ~4 frames, orange keys fade back a bit slower */
 .pushOff {
     transition:
-        transform 0.55s var(--spring),
-        background-color 0.45s ease-out,
-        box-shadow 0.45s ease-out;
+        transform 0.08s ease-out,
+        background-color 0.1s ease-out,
+        box-shadow 0.1s ease-out;
+}
+
+.operation.pushOff {
+    transition:
+        transform 0.08s ease-out,
+        background-color 0.2s ease-out,
+        box-shadow 0.2s ease-out;
 }
 
 .pushDigit,
 .pushUtil,
 .pushOperation {
-    transform: scale(1.08);
+    transform: scale(1.13);
     transition:
-        transform 0.16s ease-out,
-        background-color 0.08s linear,
-        box-shadow 0.08s linear;
+        transform 0.06s ease-out,
+        background-color 0.04s linear,
+        box-shadow 0.04s linear;
     box-shadow:
         inset 0 0.08rem 0.1rem rgb(255 255 255 / 50%),
         inset 0 -0.08rem 0.14rem rgb(255 255 255 / 20%),
@@ -373,7 +393,7 @@ body {
     box-shadow:
         inset 0 0.05rem 0.05rem rgb(255 255 255 / 22%),
         inset 0 0 0 0.04rem rgb(255 255 255 / 10%);
-    transition: transform 0.5s var(--spring), background-color 0.3s ease-out;
+    transition: transform 0.08s ease-out, background-color 0.1s ease-out;
 }
 
 #historyKey {
@@ -391,8 +411,9 @@ body {
 }
 
 .topKey.pushDigit {
-    transform: scale(1.12);
-    background-color: #3A3A3C;
+    transform: scale(1.13);
+    transition: transform 0.06s ease-out, background-color 0.04s linear;
+    background-color: var(--key-top-pressed);
     box-shadow: inset 0 0.05rem 0.05rem rgb(255 255 255 / 40%);
 }
 
