@@ -106,7 +106,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            min-height: 40px;
+            min-height: 44px;
             padding: 0 16px 0 12px;
             border-radius: 999px;
             background: var(--surface);
@@ -385,7 +385,7 @@
         .doc a#link {
             display: inline-flex;
             align-items: center;
-            min-height: 34px;
+            min-height: 40px;
             margin: 2px 0;
             padding: 0 14px;
             border-radius: 999px;
@@ -475,6 +475,29 @@
             transform: translate(-50%, 0);
         }
 
+        /* keyboard focus stays visible everywhere */
+        a:focus-visible,
+        button:focus-visible,
+        summary:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        a,
+        button,
+        summary {
+            touch-action: manipulation;
+        }
+
+        /* function page title */
+        .doc h1 {
+            margin: 28px 0 14px;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 26px;
+            line-height: 1.2;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             * {
                 transition: none !important;
@@ -537,6 +560,13 @@
             const doc = document.getElementById("doc");
             doc.innerHTML = i18next.t(isPart ? `readme_part_${params.part}` : "readme");
             styleDoc(doc);
+            // a function page has one main title: make it the page heading
+            const firstHeading = isPart && doc.querySelector("h2");
+            if (firstHeading) {
+                const h1 = document.createElement("h1");
+                h1.textContent = firstHeading.textContent;
+                firstHeading.replaceWith(h1);
+            }
 
             let link = document.querySelector("a#link");
             if (link) {

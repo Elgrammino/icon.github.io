@@ -206,7 +206,7 @@ function showAlert(text, isImportant = true) {
 }
 
 // in-app message instead of the system alert()/confirm(); resolves with the index of the pressed button,
-// the last button is the main one. Buttons react on pointerup: ontouchend cancels clicks on iOS
+// all buttons look the same (neutral). Buttons react on pointerup: ontouchend cancels clicks on iOS
 let messageQueue = [];
 
 function showMessage(text, buttons = [i18next.t("ok")]) {
@@ -225,12 +225,10 @@ function renderMessage() {
     sheet.innerHTML = '<div class="messageCard" role="alertdialog" aria-modal="true"><p class="messageText"></p><div class="messageButtons"></div></div>';
     const textEl = sheet.querySelector(".messageText");
     textEl.textContent = text;
-    textEl.classList.toggle("short", text.length <= 48 && !text.includes("\n"));
     buttons.forEach((label, index) => {
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = label;
-        button.classList.toggle("main", index === buttons.length - 1);
         button.addEventListener("pointerup", _ => close(index));
         sheet.querySelector(".messageButtons").append(button);
     });
