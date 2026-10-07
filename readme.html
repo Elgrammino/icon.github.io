@@ -2,35 +2,428 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1E2023">
+    <title>Talc Powder App</title>
     <style>
         @font-face {
-            font-family: 'SFMono';
-            src: url('./fonts/SFMono-Light.woff2') format('woff2');
-            font-weight: 300;
-            font-style: normal;
+            font-family: 'Unbounded';
+            src: url('./fonts/unbounded-semibold.woff2') format('woff2');
+            font-weight: 600;
             font-display: swap;
         }
 
+        @font-face {
+            font-family: 'Manrope';
+            src: url('./fonts/manrope-medium.woff2') format('woff2');
+            font-weight: 500;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Manrope';
+            src: url('./fonts/manrope-semibold.woff2') format('woff2');
+            font-weight: 600;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Manrope';
+            src: url('./fonts/manrope-bold.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        /* dark graphite, one accent: the calculator orange.
+           Shape rule: blocks 16px radius, interactive pills fully rounded. */
+        :root {
+            --bg: #1E2023;
+            --surface: #26292D;
+            --surface-2: #2F3337;
+            --line: rgb(255 255 255 / 7%);
+            --text: #ECEDEE;
+            --muted: #A3A8AE;
+            --accent: #FF9200;
+            --accent-pressed: #FFB700;
+            --accent-ink: #1C1206;
+            --radius: 16px;
+            --display: 'Unbounded', -apple-system, system-ui, sans-serif;
+            --body: 'Manrope', -apple-system, system-ui, sans-serif;
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            background: var(--bg);
+        }
+
         body {
-            margin: 10px;
-            background-color: #3C3F41;
-            color: #DFDFDF;
-            font-family: 'SFMono';
-            font-size: 15px;
-            width: calc(100% - 20px);
-            height: calc(100% - 20px);
+            margin: 0;
+            min-height: 100dvh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--body);
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
 
-        a {
+        .page {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 16px calc(40px + env(safe-area-inset-bottom));
+        }
+
+        /* ---------- top bar ---------- */
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+            background: rgb(30 32 35 / 86%);
+            -webkit-backdrop-filter: blur(16px) saturate(140%);
+            backdrop-filter: blur(16px) saturate(140%);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .topbar-inner {
+            max-width: 680px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 40px;
+            padding: 0 16px 0 12px;
+            border-radius: 999px;
+            background: var(--surface);
+            box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+            color: var(--text);
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.12s ease-out, background-color 0.12s ease-out;
+        }
+
+        .back::before {
+            content: "";
+            width: 9px;
+            height: 9px;
+            border-left: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            margin-left: 4px;
+        }
+
+        .back:active {
+            transform: scale(0.96);
+            background: var(--surface-2);
+        }
+
+        .version {
+            font-family: var(--display);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        /* ---------- header ---------- */
+
+        .hero {
+            padding: 28px 0 8px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 30px;
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+        }
+
+        .hero .copy {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .donate {
+            margin: 20px 0 0;
+        }
+
+        .donate button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 52px;
+            padding: 0 24px 0 20px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--accent);
+            color: var(--accent-ink);
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow:
+                inset 0 1px 0 rgb(255 255 255 / 35%),
+                0 8px 24px rgb(255 146 0 / 22%);
+            transition: transform 0.12s ease-out, background-color 0.12s ease-out;
+        }
+
+        .donate button::before {
+            content: "";
+            width: 18px;
+            height: 16px;
+            background: currentColor;
+            /* heart */
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 21'%3E%3Cpath d='M12 21 10.3 19.5C4.2 14 0 10.2 0 5.6 0 2.4 2.5 0 5.6 0c1.8 0 3.6.8 4.8 2.2L12 4l1.6-1.8C14.8.8 16.6 0 18.4 0 21.5 0 24 2.4 24 5.6c0 4.6-4.2 8.4-10.3 13.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 21'%3E%3Cpath d='M12 21 10.3 19.5C4.2 14 0 10.2 0 5.6 0 2.4 2.5 0 5.6 0c1.8 0 3.6.8 4.8 2.2L12 4l1.6-1.8C14.8.8 16.6 0 18.4 0 21.5 0 24 2.4 24 5.6c0 4.6-4.2 8.4-10.3 13.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+
+        .donate button:active {
+            transform: scale(0.97);
+            background: var(--accent-pressed);
+        }
+
+        .donate small {
             display: block;
-            color: #8caacc;
-            margin: 1rem 0;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
         }
 
-        a.inline {
-            display: inline;
-            margin: auto;
+        /* ---------- documentation text (comes from the translation files) ---------- */
+
+        .doc {
+            padding-top: 8px;
+        }
+
+        .doc h2 {
+            margin: 36px 0 12px;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 1.25;
+            letter-spacing: -0.005em;
+        }
+
+        .doc p,
+        .doc li {
+            text-align: left !important;
+        }
+
+        .doc p {
+            margin: 0 0 14px;
+        }
+
+        .doc sup {
+            display: block;
+            margin: 0 0 16px;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+            background: rgb(255 146 0 / 10%);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+            vertical-align: baseline;
+        }
+
+        .doc strong {
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .doc a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .doc ol,
+        .doc ul {
+            margin: 0 0 18px;
+            padding-left: 22px;
+        }
+
+        .doc li {
+            margin: 0 0 8px;
+        }
+
+        .doc li::marker {
+            color: var(--muted);
+        }
+
+        .doc ul ul {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* list of functions: tappable rows */
+        .doc .functions {
+            list-style: none;
+            margin: 0 0 8px;
+            padding: 0;
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+            overflow: hidden;
+        }
+
+        .doc .functions li {
+            margin: 0;
+        }
+
+        .doc .functions li + li {
+            border-top: 1px solid var(--line);
+        }
+
+        .doc .functions li > a,
+        .doc .functions li.static {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 56px;
+            padding: 12px 18px;
+            color: var(--text);
+        }
+
+        .doc .functions li.static {
+            display: block;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .doc .functions li > a::after {
+            content: "";
+            flex: none;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid var(--muted);
+            border-top: 2px solid var(--muted);
+            transform: rotate(45deg);
+        }
+
+        .doc .functions li > a:active {
+            background: var(--surface-2);
+        }
+
+        .doc .functions strong {
+            font-weight: 700;
+        }
+
+        /* remote control link */
+        .doc a#link {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            margin: 2px 0;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: var(--accent);
+            color: var(--accent-ink);
+            vertical-align: middle;
+        }
+
+        .doc a#link strong {
+            color: inherit;
+        }
+
+        /* changelog */
+        .doc details {
+            margin: 36px 0 0;
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+        }
+
+        .doc summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 56px;
+            padding: 0 18px;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .doc summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .doc summary::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid var(--muted);
+            border-bottom: 2px solid var(--muted);
+            transform: rotate(45deg);
+            transition: transform 0.2s ease-out;
+        }
+
+        .doc details[open] summary::after {
+            transform: rotate(225deg);
+        }
+
+        .doc .changes {
+            padding: 4px 18px 10px;
+        }
+
+        .doc .changes h3 {
+            margin: 14px 0 4px;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+        .doc .changes p {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(24px + env(safe-area-inset-bottom));
+            transform: translate(-50%, 20px);
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
         }
     </style>
     <script src="./js/version.js"></script>
@@ -42,26 +435,120 @@
 </head>
 
 <body>
-    <div style="text-align: center;"><strong>Talc Powder App
-            v<script>document.write(version);</script><br />
-        </strong>&copy; 2020 Michael Stark
-        <form action="https://www.paypal.com/donate" method="post" target="_top">
-            <input type="hidden" name="hosted_button_id" value="QJGGN9PQFPFN6" />
-            <input type="image" src="images/donate-button.png" />
-        </form>
-    </div>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="back" id="back" href="./"></a>
+            <span class="version" id="version"></span>
+        </div>
+    </header>
+    <main class="page">
+        <section class="hero" id="hero">
+            <h1>Talc Powder App</h1>
+            <p class="copy">&copy; 2020 Michael Stark</p>
+            <form class="donate" action="https://www.paypal.com/donate" method="post" target="_top">
+                <input type="hidden" name="hosted_button_id" value="QJGGN9PQFPFN6" />
+                <button type="submit" id="donate"></button>
+                <small>PayPal</small>
+            </form>
+        </section>
+        <article class="doc" id="doc"></article>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
     <script>
+        document.getElementById("version").textContent = "v" + version;
         i18next.use(i18nextBrowserLanguageDetector).init(i18n).then(_ => {
+            document.documentElement.lang = i18next.language;
             const params = new Proxy(new URLSearchParams(window.location.search), {
                 get: (searchParams, prop) => searchParams.get(prop),
             });
-            document.body.innerHTML += i18next.t(!!params.part ? `readme_part_${params.part}` : "readme");
+            const isPart = !!params.part;
+            const back = document.getElementById("back");
+            back.textContent = i18next.t(isPart ? "backToContents" : "backToCalculator");
+            back.href = isPart ? "./readme.html" : "./";
+            document.getElementById("donate").textContent = i18next.t("donate");
+            if (isPart) {
+                document.getElementById("hero").remove();
+            }
+
+            const doc = document.getElementById("doc");
+            doc.innerHTML = i18next.t(isPart ? `readme_part_${params.part}` : "readme");
+            styleDoc(doc);
+
             let link = document.querySelector("a#link");
             if (link) {
                 link.href = new URL("./?hostPeerId=" + localStorage.getItem("currentPeerId"), window.location.href).href;
-                link.onpointerdown = _ => navigator.clipboard.writeText(link.href);
+                link.title = i18next.t("copyLinkHint");
+                link.onpointerdown = _ => navigator.clipboard.writeText(link.href).then(_ => showToast(link.href));
             }
         });
+
+        // the translation HTML marks headings as centered <strong> paragraphs: turn them into real structure
+        function styleDoc(doc) {
+            for (const p of [...doc.querySelectorAll("p")]) {
+                const isCentered = (p.getAttribute("style") || "").includes("center");
+                p.removeAttribute("style");
+                const onlyStrong = p.children.length === 1 && p.children[0].tagName === "STRONG" && p.textContent.trim() === p.children[0].textContent.trim();
+                if (isCentered && (onlyStrong || p.textContent.trim().length < 30)) {
+                    const isVersion = /^\d+\.\d+$/.test(p.textContent.trim());
+                    const h = document.createElement(isVersion ? "h3" : "h2");
+                    h.textContent = p.textContent.trim();
+                    p.replaceWith(h);
+                }
+            }
+            doc.querySelectorAll("[style]").forEach(el => el.removeAttribute("style"));
+            // part pages start with <div><div><strong>Title</strong></div></div>: make it a heading
+            const strongTitle = doc.querySelector("div > strong");
+            if (strongTitle) {
+                const h = document.createElement("h2");
+                h.textContent = strongTitle.textContent.trim();
+                let wrapper = strongTitle.parentElement;
+                while (wrapper.parentElement !== doc && wrapper.parentElement.tagName === "DIV") {
+                    wrapper = wrapper.parentElement;
+                }
+                wrapper.replaceWith(h);
+            }
+
+            // functions list: the innermost list whose items link to parts
+            const firstPartLink = doc.querySelector('a[href*="part="]');
+            if (firstPartLink) {
+                const list = firstPartLink.closest("ul");
+                list.classList.add("functions");
+                list.querySelectorAll("li").forEach(li => {
+                    if (!li.querySelector("a")) li.classList.add("static");
+                    li.querySelectorAll("br").forEach(br => br.replaceWith(" "));
+                });
+                const outer = list.parentElement.closest("ul");
+                if (outer) outer.replaceWith(list);
+            }
+
+            // changelog: everything from the heading before the first version into a collapsible block
+            const firstVersion = doc.querySelector("h3");
+            const title = firstVersion?.previousElementSibling;
+            if (title && title.tagName === "H2") {
+                const details = document.createElement("details");
+                const summary = document.createElement("summary");
+                summary.textContent = title.textContent;
+                const body = document.createElement("div");
+                body.className = "changes";
+                details.append(summary, body);
+                let node = title.nextSibling;
+                while (node) {
+                    const next = node.nextSibling;
+                    body.append(node);
+                    node = next;
+                }
+                title.replaceWith(details);
+            }
+        }
+
+        let toastTimer;
+        function showToast(text) {
+            const toast = document.getElementById("toast");
+            toast.textContent = "✓ " + text.replace(/^https?:\/\//, "").slice(0, 42) + "…";
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(_ => toast.classList.remove("show"), 1800);
+        }
     </script>
 </body>
 

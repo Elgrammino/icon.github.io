@@ -1,7 +1,7 @@
 // Offline: all files are saved on the phone at first launch and served from there.
 // When any file changes, bump the version here AND in js/version.js,
 // otherwise users keep the old version from the cache.
-const CACHE_NAME = "calculator-1.70";
+const CACHE_NAME = "calculator-1.71";
 
 // paths are relative to sw.js
 const ASSETS = [
@@ -27,7 +27,11 @@ const ASSETS = [
     "./fonts/SFMono-Light.woff2",
     "./fonts/SFProDisplay-Light.woff2",
     "./fonts/SFProDisplay-Regular.woff2",
-    "./fonts/SFProDisplay-Semibold.woff2"
+    "./fonts/SFProDisplay-Semibold.woff2",
+    "./fonts/unbounded-semibold.woff2",
+    "./fonts/manrope-medium.woff2",
+    "./fonts/manrope-semibold.woff2",
+    "./fonts/manrope-bold.woff2"
 ];
 
 self.addEventListener("install", event => {

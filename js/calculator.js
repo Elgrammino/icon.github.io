@@ -12,8 +12,9 @@ if ("serviceWorker" in navigator) {
         registration.addEventListener("updatefound", _ => {
             const worker = registration.installing;
             worker?.addEventListener("statechange", _ => {
-                if (worker.state === "installed" && navigator.serviceWorker.controller && confirm(i18next.t("updateAvailable"))) {
-                    window.location.reload();
+                if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                    showMessage(i18next.t("updateAvailable"), [i18next.t("cancel"), i18next.t("update")])
+                        .then(choice => choice === 1 && window.location.reload());
                 }
             });
         });
@@ -59,7 +60,7 @@ if (isClientMode()) {
 const currentVersion = localStorage.getItem("currentVersion");
 if (!currentVersion || currentVersion !== version) {
     if (!isClientMode() && !!currentVersion) {
-        alert(i18next.t("newVersionAvailable") + currentVersion);
+        showMessage(i18next.t("newVersionAvailable") + currentVersion);
     }
     localStorage.setItem("currentVersion", version);
 }
@@ -199,9 +200,54 @@ function showAlert(text, isImportant = true) {
         if (isNotificationPossible()) {
             pushNotification("alert", alertBuffer);
         } else if (isImportant) {
-            alert(text);
+            showMessage(text);
         }
     }
+}
+
+// in-app message instead of the system alert()/confirm(); resolves with the index of the pressed button,
+// the last button is the main one. Buttons react on pointerup: ontouchend cancels clicks on iOS
+let messageQueue = [];
+
+function showMessage(text, buttons = [i18next.t("ok")]) {
+    return new Promise(resolve => {
+        messageQueue.push({ text, buttons, resolve });
+        if (messageQueue.length === 1) {
+            renderMessage();
+        }
+    });
+}
+
+function renderMessage() {
+    const { text, buttons, resolve } = messageQueue[0];
+    const sheet = document.createElement("div");
+    sheet.className = "messageSheet";
+    sheet.innerHTML = '<div class="messageCard" role="alertdialog" aria-modal="true"><p class="messageText"></p><div class="messageButtons"></div></div>';
+    const textEl = sheet.querySelector(".messageText");
+    textEl.textContent = text;
+    textEl.classList.toggle("short", text.length <= 48 && !text.includes("\n"));
+    buttons.forEach((label, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.classList.toggle("main", index === buttons.length - 1);
+        button.addEventListener("pointerup", _ => close(index));
+        sheet.querySelector(".messageButtons").append(button);
+    });
+    function close(index) {
+        if (!sheet.classList.contains("show")) {
+            return;
+        }
+        sheet.classList.remove("show");
+        setTimeout(_ => sheet.remove(), 200);
+        messageQueue.shift();
+        resolve(index);
+        if (messageQueue.length) {
+            setTimeout(renderMessage, 220);
+        }
+    }
+    document.body.append(sheet);
+    requestAnimationFrame(_ => requestAnimationFrame(_ => sheet.classList.add("show")));
 }
 
 function feedback(isMagic) {

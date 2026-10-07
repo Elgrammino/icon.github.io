@@ -1,5 +1,12 @@
 const i18n_en = {
     "translation": {
+        "donate": "Support the author",
+        "backToCalculator": "Calculator",
+        "backToContents": "All functions",
+        "ok": "OK",
+        "cancel": "Not now",
+        "update": "Update",
+        "copyLinkHint": "Tap to copy",
         "updateAvailable": "A new version is available. Update?",
         "error": "Error",
         "newVersionAvailable": "New version installed. Read the documentation before use. Version before update: ",
@@ -29,17 +36,17 @@ const i18n_en = {
             <li>From this moment on, the <strong>CLIENT</strong> will constantly try to find the <strong>HOST</strong> phone at the specified address and connect.</li>
             <li>The <strong>CLIENT</strong> calculator will work in normal calculator mode, and will secretly enable magic functions upon command from the <strong>HOST</strong> after both phones are connected</li>
             <li>On the <strong>HOST</strong> phone you need to restart the application and make sure that the remote control function is enabled</li>
-            <li>The <strong>HOST</strong> screen frame will be green if the connection has been established</li>
+            <li>On the <strong>HOST</strong> the ring around the calculator button in the top right corner turns green when the connection is established</li>
             </ol>
-            <p>What do the frame colors mean:</p>
+            <p>What do the highlight colors mean:</p>
             <ul>
-            <li>White (flashing) - activation/deactivation of any function in the calculator</li>
+            <li>History button flashes - activation/deactivation of any function in the calculator</li>
             <li>Yellow (constant) - waiting for <strong>CLIENT</strong> connection</li>
             <li>Green (constant) - connection is established, everything is fine and you can work</li>
             <li>Red (constant) - a disconnection has occurred for some reason and the application itself will try to either restore access or reboot to start the connection again. In this case, you need to manually enable the remote control function again and wait for the connection. The <strong>CLIENT's</strong> phone works offline and does not require any action</li>
             </ul>
             <p>How to control:</p>
-            <p>The <strong>HOST</strong> phone controls the <strong>CLIENT</strong>. It is also desirable that notifications be allowed. Otherwise, control will not be so convenient. When the frame is green you can enable the functions: History, DD Force and TOXIC Force. Your actions will receive feedback in the form of a notification about the actions taken on the <strong>CLIENT&rsquo;s</strong> phone.</p>`,
+            <p>The <strong>HOST</strong> phone controls the <strong>CLIENT</strong>. It is also desirable that notifications be allowed. Otherwise, control will not be so convenient. When the ring is green you can enable the functions: History, DD Force and TOXIC Force. Your actions will receive feedback in the form of a notification about the actions taken on the <strong>CLIENT&rsquo;s</strong> phone.</p>`,
         "readme_part_2": `<p style="text-align: center;"><strong>(%) Numerology</strong></p>
             <p>Allows you to calculate the number of fate in numerology. Enter a <strong>NUMBER</strong> and enable the function. The negative sign and fraction sign will be ignored. After enabling the function, instead of the % sign, 2 digits, for 1 second, separated by a slash, will appear.</p>
             <ul>
@@ -61,7 +68,7 @@ const i18n_en = {
             <p>The forcing function operates in two modes:</p>
             <ul>
             <li><strong>automatic</strong> - turn the device screen down. The application automatically detects when the phone is upside down and blocks input as long as the phone is upside down.</li>
-            <li><strong>manual</strong> - hold down the 0 button for 2 seconds until a white frame appears. This allows you to precisely control when the phone will block input. After turning on, the locking begins from the moment you first tap on the screen and for 10 seconds until the white frame appears again. This mode allows you to force the number by asking the viewer to close their eyes and not turn the phone over. Has priority over automatic mode.</li>
+            <li><strong>manual</strong> - hold down the 0 button for 2 seconds until the history button lights up. This allows you to precisely control when the phone will block input. After turning on, the locking begins from the moment you first tap on the screen and for 10 seconds until the history button lights up again. This mode allows you to force the number by asking the viewer to close their eyes and not turn the phone over. Has priority over automatic mode.</li>
             </ul>
             <p>If the application has access (if not, then after enabling the function the application will notify about it) to the orientation of the device in space, then the mode will be <strong>automatic</strong>. At this moment, clicking on the screen causes a number to appear that is necessary to calculate the forced <strong>NUMBER</strong>. Formula: (any_calculations)&lt;any_operation&gt;X=<strong>NUMBER</strong>. Where X is the number that will be substituted for clicks on the screen. The required number is adapted to the last operation before turning the device over. But it is advisable to use + or -. In the case of the &times; and &divide; operations, the result of the calculation may not be accurate when duplicated on other calculators due to the nature of irrational numbers.</p>
             <p>If notifications are enabled or X=<strong>NUMBER</strong>, then X will be entered one digit for each touch on the screen while input is blocked. The number of required touches will be displayed in notifications if available. If not, the X will be displayed in its entirety the first time you tap on the screen.&nbsp;Each tap on the screen will trigger an animation of pressing the desired button. This allows to broadcast phone screen to a large screen on stage.</p>
@@ -84,7 +91,7 @@ const i18n_en = {
             <p style="text-align: justify;"><span style="text-decoration: underline;">Android</span>: permission to display notifications. If enabled, the "peek" function will be displayed in the notification panel. Thus, you can receive notifications on your smart watch. Otherwise, the information will be displayed in a pop-up window.</p>
             <p style="text-align: justify;"><span style="text-decoration: underline;">iOS</span>: permission to access the device orientation for the "DD force" function. Starting with iOS 13, the application is required to request permission every time the application is launched. The permission request will only occur when the "DD force" function is enabled.</p>
             <p style="text-align: center;">Functions</p>
-            <p style="text-align: justify;">Any function is activated by holding the corresponding button for 2 seconds. After that, the application will vibrate and a white frame will appear around the edges of the screen. Vibration is not available on iOS.</p>
+            <p style="text-align: justify;">Any function is activated by holding the corresponding button for 2 seconds. After that, the application will vibrate and the history button (clock) in the top left corner will light up for a moment. Vibration is not available on iOS.</p>
             <ul>
             <ul>
             <li style="text-align: justify;"><strong>(AC/C)</strong><br />Completely restarts the application and clears history.</li>
