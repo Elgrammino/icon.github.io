@@ -2,6 +2,10 @@
 // if (window.location.origin !== "https://michaelstark.github.io") {
 //     window.location.replace("https://michaelstark.github.io/calculator/");
 // }
+// home screen app: 100% height is short by the status bar, use the whole screen
+if (navigator.standalone) {
+    document.documentElement.style.setProperty("--app-height", screen.height + "px");
+}
 let swr;
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").then(registration => { // enable PWA, works offline
@@ -156,11 +160,11 @@ function convertDDFTimeForce() {
     }
 }
 
-// AC/C state lives in the text of the key (used by the scripts), CSS draws "AC" or ⌫
+// AC/C state lives in the text of the key (used by the scripts); after "=" iOS shows "AC"
 new MutationObserver(updateResetKey).observe(resetEl, { childList: true, characterData: true, subtree: true });
 
 function updateResetKey() {
-    resetEl.classList.toggle("backspace", resetEl.innerText === "C" && operation !== "=");
+    resetEl.classList.toggle("showAC", resetEl.innerText === "C" && operation === "=");
 }
 
 function isClientMode() {
@@ -339,7 +343,27 @@ function btnHandler(target) {
             case "c":
                 if (target.innerText === "AC" || operation === "=") {
                     reset();
-                } else if (isDigitsTyping) {
+                } else {
+                    // C: clear the current number, the expression stays
+                    resetEl.innerText = "AC";
+                    inputValue = "0";
+                    if (!isDigitsTyping && operation !== "=") {
+                        doFakeTouchButton(operation);
+                    }
+                    if (isDigitsTyping) {
+                        add2MagicHistory(inputValue);
+                    }
+                    if (isOperationPending()) {
+                        isDigitsTyping = false;
+                    }
+                    displayValue(inputValue);
+                }
+                break;
+            case "del":
+                if (operation === "=" && !isDigitsTyping) {
+                    break;
+                }
+                if (isDigitsTyping) {
                     // iOS 26 ⌫: delete last digit
                     deleteLastDigit();
                     if (inputValue === "0") {
@@ -360,18 +384,9 @@ function btnHandler(target) {
                     inputValue = lastOperand.toString();
                     isDigitsTyping = true;
                     syncResultValue();
+                    resetEl.innerText = "C";
                     displayValue(inputValue);
                     add2MagicHistory(inputValue);
-                } else {
-                    resetEl.innerText = "AC";
-                    inputValue = "0";
-                    if (!isDigitsTyping && operation !== "=") {
-                        doFakeTouchButton(operation);
-                    }
-                    displayValue(inputValue);
-                    if (isDigitsTyping) {
-                        add2MagicHistory(inputValue);
-                    }
                 }
                 break;
             case "%":

@@ -40,20 +40,23 @@
     }
 }
 
-/* iOS 26 Calculator palette */
+/*
+ * iOS 26 Calculator. Measured on iPhone Pro Max (430 pt wide, 1rem = 17.85 pt):
+ * keys 93 × 89 pt, 8.5 pt gaps, 16 pt side margins, top keys 43 pt.
+ */
 :root {
     --bg: #000;
     --text: #FFF;
-    --text-secondary: #8D8D93;
-    --key-digit: #2E2E30;
-    --key-digit-pressed: #6E6E73;
+    --text-secondary: #8E8E93;
+    --key-digit: #333335;
+    --key-digit-pressed: #737378;
     --key-util: #5C5C5F;
     --key-util-pressed: #9A9A9F;
-    --key-operation: #FF9500;
-    --key-operation-pressed: #FFC266;
+    --key-operation: #F29A36;
+    --key-operation-pressed: #F8C890;
+    --key-top: #1C1C1E;
     --font: -apple-system, 'SFProDisplay', system-ui, sans-serif;
     --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --icon-backspace: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.2 5h9.6a2.4 2.4 0 0 1 2.4 2.4v9.2a2.4 2.4 0 0 1-2.4 2.4H9.2a2 2 0 0 1-1.5-.7L2.8 12l4.9-6.3A2 2 0 0 1 9.2 5z'/%3E%3Cpath d='M11.6 9.3l5.4 5.4M17 9.3l-5.4 5.4'/%3E%3C/svg%3E");
 }
 
 * {
@@ -70,10 +73,11 @@ body {
     transition: box-shadow 0.2s ease-in-out;
     background-color: var(--bg);
     width: 100%;
-    height: 100%;
+    /* --app-height: whole screen in the home screen app (set in calculator.js) */
+    height: var(--app-height, 100%);
     margin: 0;
     padding: 0;
-    font-size: min(2.72vh, 4.15vw);
+    font-size: min(2.1vh, 4.15vw);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
 }
@@ -108,18 +112,20 @@ body {
 }
 
 #calc {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    max-width: 23.2rem;
+    max-width: 24.1rem;
     height: 100%;
     margin: auto;
+    padding: 0 0.66rem;
 }
 
 /* ---------- display ---------- */
 
 .displayArea {
-    padding: 0 0.75rem 0.6rem;
+    padding: 0 0.38rem 0.75rem;
 }
 
 #expression {
@@ -129,70 +135,71 @@ body {
     white-space: nowrap;
     color: var(--text-secondary);
     font-family: var(--font);
-    font-weight: 400;
-    font-size: 2rem;
-    line-height: 2.6rem;
-    height: 2.6rem;
+    font-weight: 500;
+    font-size: 1.85rem;
+    line-height: 2.3rem;
+    height: 2.3rem;
+    margin-bottom: 0;
 }
 
 #display {
     color: var(--text);
     font-family: var(--font);
-    font-weight: 300;
+    font-weight: 500;
     text-align: right;
-    line-height: 6.6rem;
+    line-height: 4.6rem;
     width: 100%;
     overflow: hidden;
     white-space: nowrap;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
 }
 
 .displayS1 {
-    font-size: 5.6rem;
+    font-size: 4.3rem;
 }
 
 .displayS2 {
-    font-size: 4.8rem;
-}
-
-.displayS3 {
-    font-size: 4.2rem;
-}
-
-.displayS4 {
     font-size: 3.6rem;
 }
 
+.displayS3 {
+    font-size: 3.2rem;
+}
+
+.displayS4 {
+    font-size: 2.8rem;
+}
+
 .displayS5 {
-    font-size: 3.1rem;
+    font-size: 2.45rem;
 }
 
 .displayS6 {
-    font-size: 2.6rem;
+    font-size: 2.1rem;
 }
 
 .displayS7 {
-    font-size: 2.2rem;
-}
-
-.displayS8 {
     font-size: 1.8rem;
 }
 
+.displayS8 {
+    font-size: 1.55rem;
+}
+
 .displayS9 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 .displayS10 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
 }
 
 .displayS11 {
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .calcOffset {
-    height: calc(3.4rem + env(safe-area-inset-bottom));
+    height: calc(1.3rem + env(safe-area-inset-bottom));
 }
 
 /* ---------- keys: Liquid Glass ---------- */
@@ -202,40 +209,38 @@ body {
     justify-content: center;
 }
 
-.button,
-#modeKey {
+.button {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 5rem;
-    height: 5rem;
-    margin: 0.4rem;
+    width: 5.21rem;
+    height: 4.99rem;
+    margin: 0.25rem 0.238rem;
     border-radius: 50%;
     color: var(--text);
     font-family: var(--font);
-    font-weight: 400;
-    font-size: 2.55rem;
+    font-weight: 500;
+    font-size: 2.2rem;
     line-height: 1;
     background-color: var(--key-digit);
     /* glass rim: bright top edge, faint bottom bounce light, hairline border */
     box-shadow:
-        inset 0 0.07rem 0.06rem rgb(255 255 255 / 32%),
-        inset 0 -0.07rem 0.1rem rgb(255 255 255 / 10%),
+        inset 0 0.07rem 0.06rem rgb(255 255 255 / 26%),
+        inset 0 -0.07rem 0.1rem rgb(255 255 255 / 8%),
         inset 0 0 0 0.04rem rgb(255 255 255 / 9%);
     transform: scale(1);
 }
 
 /* specular sheen across the glass */
-.button::before,
-#modeKey::before {
+.button::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
     background:
-        radial-gradient(120% 80% at 50% -10%, rgb(255 255 255 / 16%), transparent 55%),
-        radial-gradient(90% 60% at 50% 115%, rgb(255 255 255 / 6%), transparent 60%);
+        radial-gradient(120% 80% at 50% -10%, rgb(255 255 255 / 12%), transparent 55%),
+        radial-gradient(90% 60% at 50% 115%, rgb(255 255 255 / 5%), transparent 60%);
     pointer-events: none;
 }
 
@@ -257,11 +262,10 @@ body {
 
 .util {
     background-color: var(--key-util);
-    font-size: 2.3rem;
-    font-weight: 500;
 }
 
-.digit {
+.digit,
+.dark {
     background-color: var(--key-digit);
 }
 
@@ -270,43 +274,32 @@ body {
 }
 
 .operation svg {
-    width: 2.25rem;
-    height: 2.25rem;
-    stroke-width: 2.3;
+    width: 2.45rem;
+    height: 2.45rem;
+    stroke-width: 2.5;
 }
 
 [id="+-"] svg {
-    width: 2.4rem;
-    height: 2.4rem;
-    stroke-width: 2.1;
+    width: 2.6rem;
+    height: 2.6rem;
+    stroke-width: 2.2;
 }
 
-#modeKey svg {
-    width: 2.2rem;
-    height: 2.2rem;
-    stroke-width: 1.7;
+[id="del"] svg {
+    width: 2.75rem;
+    height: 2.75rem;
+    stroke-width: 2;
 }
 
-/* AC / backspace key: the label is drawn by CSS, the text node keeps the "AC"/"C" state for the scripts */
-#c {
+/* after "=" the key keeps "C" for the scripts but shows "AC" like iOS */
+#c.showAC {
     font-size: 0;
 }
 
-#c::after {
+#c.showAC::after {
     content: "AC";
     position: relative;
-    font-size: 2.05rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-}
-
-#c.backspace::after {
-    content: "";
-    width: 2.45rem;
-    height: 2.45rem;
-    background-color: currentColor;
-    -webkit-mask: var(--icon-backspace) center / contain no-repeat;
-    mask: var(--icon-backspace) center / contain no-repeat;
+    font-size: 2.2rem;
 }
 
 /* numerology result on % (sup⁄sub) */
@@ -320,12 +313,12 @@ body {
 
 [id="%"]>sup {
     align-self: flex-start;
-    margin-top: 1.25rem;
+    margin-top: 1.2rem;
 }
 
 [id="%"]>sub {
     align-self: flex-end;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.2rem;
 }
 
 /* press: the glass swells and lights up, then springs back */
@@ -339,19 +332,20 @@ body {
 .pushDigit,
 .pushUtil,
 .pushOperation {
-    transform: scale(1.1);
+    transform: scale(1.08);
     transition:
         transform 0.16s ease-out,
         background-color 0.08s linear,
         box-shadow 0.08s linear;
     box-shadow:
-        inset 0 0.08rem 0.1rem rgb(255 255 255 / 55%),
-        inset 0 -0.08rem 0.14rem rgb(255 255 255 / 22%),
-        inset 0 0 0 0.05rem rgb(255 255 255 / 22%),
+        inset 0 0.08rem 0.1rem rgb(255 255 255 / 50%),
+        inset 0 -0.08rem 0.14rem rgb(255 255 255 / 20%),
+        inset 0 0 0 0.05rem rgb(255 255 255 / 20%),
         0 0.6rem 1.6rem rgb(0 0 0 / 45%);
 }
 
-.pushDigit {
+.pushDigit,
+.dark.pushUtil {
     background-color: var(--key-digit-pressed);
 }
 
@@ -363,38 +357,43 @@ body {
     background-color: var(--key-operation-pressed);
 }
 
-/* ---------- top-left history glass button ---------- */
+/* ---------- top glass keys: history (left) and calculator mode (right) ---------- */
 
-#historyKey {
+.topKey {
     position: absolute;
-    top: calc(env(safe-area-inset-top) + 0.9rem);
-    left: max(1rem, calc(50% - 11.2rem));
+    top: calc(max(env(safe-area-inset-top), 0.8rem) + 0.05rem);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.85rem;
-    height: 2.85rem;
+    width: 2.4rem;
+    height: 2.4rem;
     border-radius: 50%;
     color: var(--text);
-    background-color: rgb(255 255 255 / 9%);
+    background-color: var(--key-top);
     box-shadow:
-        inset 0 0.06rem 0.06rem rgb(255 255 255 / 30%),
+        inset 0 0.05rem 0.05rem rgb(255 255 255 / 22%),
         inset 0 0 0 0.04rem rgb(255 255 255 / 10%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    backdrop-filter: blur(12px) saturate(160%);
     transition: transform 0.5s var(--spring), background-color 0.3s ease-out;
 }
 
-#historyKey svg {
-    width: 1.45rem;
-    height: 1.45rem;
-    stroke-width: 2;
+#historyKey {
+    left: 0.95rem;
 }
 
-#historyKey.pushDigit {
+#modeKey {
+    right: 0.95rem;
+}
+
+.topKey svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    stroke-width: 2.1;
+}
+
+.topKey.pushDigit {
     transform: scale(1.12);
-    background-color: rgb(255 255 255 / 22%);
-    box-shadow: inset 0 0.06rem 0.06rem rgb(255 255 255 / 45%);
+    background-color: #3A3A3C;
+    box-shadow: inset 0 0.05rem 0.05rem rgb(255 255 255 / 40%);
 }
 
 /* ---------- magic / remote control feedback ---------- */
@@ -421,14 +420,14 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
     .pushOff,
-    #historyKey {
+    .topKey {
         transition: background-color 0.3s linear;
     }
 
     .pushDigit,
     .pushUtil,
     .pushOperation,
-    #historyKey.pushDigit {
+    .topKey.pushDigit {
         transform: none;
     }
 }
