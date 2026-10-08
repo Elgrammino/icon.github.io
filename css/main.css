@@ -157,7 +157,7 @@ body {
     letter-spacing: -0.01em;
 }
 
-/* iOS keeps the expression at full size and cuts its start with a fade */
+/* when even the smallest expression size does not fit, iOS cuts its start with a fade */
 #display.clipped,
 #expression.clipped {
     display: flex;
@@ -172,6 +172,24 @@ body {
 
 .displayS2 {
     font-size: 3.6rem;
+}
+
+/* expression being typed: iOS 26 shrinks it in two steps (90%, 81%) and then cuts the start off;
+   two more steps of ours keep a long DDF number fully on screen before the cut */
+.displayP2 {
+    font-size: 3.87rem;
+}
+
+.displayP3 {
+    font-size: 3.48rem;
+}
+
+.displayP4 {
+    font-size: 3.1rem;
+}
+
+.displayP5 {
+    font-size: 2.8rem;
 }
 
 .displayS3 {

@@ -662,9 +662,14 @@ function deleteLastDigit() {
 
 function displayValue(value, showAsIs = false) {
     if (isOperationPending()) {
-        // iOS: the expression keeps full size, its start is cut off with a fade
+        // iOS: the expression shrinks a little, then its start is cut off with a fade
         displayEl.innerText = expressionText + (isDigitsTyping ? formatOperand(value) : "") || "0";
-        displayEl.className = "displayS1";
+        for (let size of ["displayS1", "displayP2", "displayP3", "displayP4", "displayP5"]) {
+            displayEl.className = size;
+            if (!isTextOverflowing(displayEl)) {
+                break;
+            }
+        }
         displayEl.classList.toggle("clipped", isTextOverflowing(displayEl));
         return;
     }
