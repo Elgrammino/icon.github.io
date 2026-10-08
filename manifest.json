@@ -2,7 +2,7 @@
     "id": "/calculator/",
     "name": "Calculator",
     "short_name": "Calculator",
-    "description": "Talc Powder App",
+    "description": "Calculator App",
     "start_url": "./",
     "display": "fullscreen",
     "orientation": "portrait",

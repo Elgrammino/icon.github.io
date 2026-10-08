@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#1E2023">
-    <title>Talc Powder App</title>
+    <meta name="theme-color" content="#000000">
+    <title>Calculator App</title>
     <style>
         @font-face {
             font-family: 'Unbounded';
@@ -35,13 +35,30 @@
             font-display: swap;
         }
 
-        /* dark graphite, one accent: the calculator orange.
+        /* black, one accent: the calculator orange. Buttons and cards are Liquid Glass.
            Shape rule: blocks 16px radius, interactive pills fully rounded. */
         :root {
-            --bg: #1E2023;
-            --surface: #26292D;
-            --surface-2: #2F3337;
-            --line: rgb(255 255 255 / 7%);
+            --bg: #000000;
+            --surface: #141414;
+            --surface-2: #222222;
+            --line: rgb(255 255 255 / 8%);
+            /* clear glass: light sheen on top, bright rim above, soft rim below */
+            --glass: linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, rgb(255 255 255 / 6%) 55%, rgb(255 255 255 / 9%) 100%);
+            --glass-pressed: linear-gradient(180deg, rgb(255 255 255 / 24%) 0%, rgb(255 255 255 / 12%) 55%, rgb(255 255 255 / 15%) 100%);
+            --glass-rim:
+                inset 0 1px 0.5px rgb(255 255 255 / 45%),
+                inset 0 -1px 0.5px rgb(255 255 255 / 12%),
+                inset 0 0 0 0.5px rgb(255 255 255 / 14%),
+                0 8px 24px rgb(0 0 0 / 50%);
+            /* orange glass for the main actions */
+            --glass-accent: linear-gradient(180deg, rgb(255 184 77 / 95%) 0%, rgb(255 146 0 / 88%) 55%, rgb(230 120 0 / 92%) 100%);
+            --glass-accent-pressed: linear-gradient(180deg, rgb(255 214 120) 0%, rgb(255 183 0) 100%);
+            --glass-accent-rim:
+                inset 0 1px 0.5px rgb(255 255 255 / 65%),
+                inset 0 -1px 1px rgb(120 50 0 / 35%),
+                inset 0 0 0 0.5px rgb(255 255 255 / 25%),
+                0 8px 28px rgb(255 146 0 / 28%);
+            --blur: blur(20px) saturate(180%);
             --text: #ECEDEE;
             --muted: #A3A8AE;
             --accent: #FF9200;
@@ -87,9 +104,9 @@
             top: 0;
             z-index: 2;
             padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
-            background: rgb(30 32 35 / 86%);
-            -webkit-backdrop-filter: blur(16px) saturate(140%);
-            backdrop-filter: blur(16px) saturate(140%);
+            background: rgb(0 0 0 / 72%);
+            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur);
             border-bottom: 1px solid var(--line);
         }
 
@@ -109,12 +126,14 @@
             min-height: 44px;
             padding: 0 16px 0 12px;
             border-radius: 999px;
-            background: var(--surface);
-            box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+            background: var(--glass);
+            box-shadow: var(--glass-rim);
+            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur);
             color: var(--text);
             font-weight: 600;
             text-decoration: none;
-            transition: transform 0.12s ease-out, background-color 0.12s ease-out;
+            transition: transform 0.12s ease-out;
         }
 
         .back::before {
@@ -129,7 +148,7 @@
 
         .back:active {
             transform: scale(0.96);
-            background: var(--surface-2);
+            background: var(--glass-pressed);
         }
 
         .version {
@@ -166,7 +185,7 @@
             padding: 16px;
             border-radius: var(--radius);
             background: var(--surface);
-            box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+            box-shadow: inset 0 0 0 0.5px var(--line);
         }
 
         .setting h2 {
@@ -183,6 +202,7 @@
             padding: 4px;
             border-radius: 999px;
             background: var(--bg);
+            box-shadow: inset 0 1px 3px rgb(0 0 0 / 60%), inset 0 0 0 0.5px var(--line);
         }
 
         .segmented button {
@@ -199,9 +219,9 @@
         }
 
         .segmented button[aria-checked="true"] {
-            background: var(--accent);
+            background: var(--glass-accent);
             color: var(--accent-ink);
-            box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%);
+            box-shadow: var(--glass-accent-rim);
         }
 
         .segmented button:active {
@@ -227,16 +247,14 @@
             padding: 0 24px 0 20px;
             border: 0;
             border-radius: 999px;
-            background: var(--accent);
+            background: var(--glass-accent);
             color: var(--accent-ink);
             font-family: var(--body);
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
-            box-shadow:
-                inset 0 1px 0 rgb(255 255 255 / 35%),
-                0 8px 24px rgb(255 146 0 / 22%);
-            transition: transform 0.12s ease-out, background-color 0.12s ease-out;
+            box-shadow: var(--glass-accent-rim);
+            transition: transform 0.12s ease-out;
         }
 
         .donate button::before {
@@ -251,7 +269,7 @@
 
         .donate button:active {
             transform: scale(0.97);
-            background: var(--accent-pressed);
+            background: var(--glass-accent-pressed);
         }
 
         .donate small {
@@ -327,58 +345,11 @@
             padding: 0;
         }
 
-        /* list of functions: tappable rows */
+        /* functions: one collapsible card each */
         .doc .functions {
-            list-style: none;
+            display: grid;
+            gap: 10px;
             margin: 0 0 8px;
-            padding: 0;
-            border-radius: var(--radius);
-            background: var(--surface);
-            box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
-            overflow: hidden;
-        }
-
-        .doc .functions li {
-            margin: 0;
-        }
-
-        .doc .functions li + li {
-            border-top: 1px solid var(--line);
-        }
-
-        .doc .functions li > a,
-        .doc .functions li.static {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            min-height: 56px;
-            padding: 12px 18px;
-            color: var(--text);
-        }
-
-        .doc .functions li.static {
-            display: block;
-            color: var(--muted);
-            font-size: 15px;
-        }
-
-        .doc .functions li > a::after {
-            content: "";
-            flex: none;
-            width: 8px;
-            height: 8px;
-            border-right: 2px solid var(--muted);
-            border-top: 2px solid var(--muted);
-            transform: rotate(45deg);
-        }
-
-        .doc .functions li > a:active {
-            background: var(--surface-2);
-        }
-
-        .doc .functions strong {
-            font-weight: 700;
         }
 
         /* remote control link */
@@ -387,36 +358,55 @@
             align-items: center;
             min-height: 40px;
             margin: 2px 0;
-            padding: 0 14px;
+            padding: 0 16px;
             border-radius: 999px;
-            background: var(--accent);
+            background: var(--glass-accent);
+            box-shadow: var(--glass-accent-rim);
             color: var(--accent-ink);
             vertical-align: middle;
+            transition: transform 0.12s ease-out;
+        }
+
+        .doc a#link:active {
+            transform: scale(0.96);
+            background: var(--glass-accent-pressed);
         }
 
         .doc a#link strong {
             color: inherit;
         }
 
-        /* changelog */
+        /* collapsible cards (functions and changelog) are glass panes */
         .doc details {
-            margin: 36px 0 0;
             border-radius: var(--radius);
-            background: var(--surface);
-            box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+            background: var(--glass);
+            box-shadow: var(--glass-rim);
+            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur);
+        }
+
+        .doc details.changelog {
+            margin: 36px 0 0;
         }
 
         .doc summary {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
             min-height: 56px;
             padding: 0 18px;
+            border-radius: var(--radius);
             font-family: var(--display);
             font-weight: 600;
             font-size: 16px;
             cursor: pointer;
             list-style: none;
+            transition: background-color 0.12s ease-out;
+        }
+
+        .doc summary:active {
+            background: rgb(255 255 255 / 6%);
         }
 
         .doc summary::-webkit-details-marker {
@@ -437,8 +427,33 @@
             transform: rotate(225deg);
         }
 
-        .doc .changes {
+        .doc summary::after {
+            flex: none;
+        }
+
+        .doc .fold-body {
             padding: 4px 18px 10px;
+        }
+
+        .doc .fold-body sup {
+            background: rgb(255 146 0 / 12%);
+        }
+
+        /* smooth open/close where the browser can animate it; elsewhere it just toggles */
+        @supports selector(::details-content) {
+            .doc details::details-content {
+                block-size: 0;
+                overflow: clip;
+                transition: block-size 0.25s ease-out, content-visibility 0.25s allow-discrete;
+            }
+
+            .doc details[open]::details-content {
+                block-size: auto;
+            }
+        }
+
+        :root {
+            interpolate-size: allow-keywords;
         }
 
         .doc .changes h3 {
@@ -461,7 +476,10 @@
             transform: translate(-50%, 20px);
             padding: 10px 18px;
             border-radius: 999px;
-            background: var(--surface-2);
+            background: rgb(40 40 40 / 70%);
+            box-shadow: var(--glass-rim);
+            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur);
             color: var(--text);
             font-weight: 600;
             font-size: 14px;
@@ -521,7 +539,7 @@
     </header>
     <main class="page">
         <section class="hero" id="hero">
-            <h1>Talc Powder App</h1>
+            <h1>Calculator App</h1>
             <p class="copy">&copy; 2020 Michael Stark</p>
             <section class="setting">
                 <h2 id="uiTitle"></h2>
@@ -603,37 +621,59 @@
                 wrapper.replaceWith(h);
             }
 
-            // functions list: the innermost list whose items link to parts
+            // functions list: every function folds open in place, like the changelog
             const firstPartLink = doc.querySelector('a[href*="part="]');
             if (firstPartLink) {
                 const list = firstPartLink.closest("ul");
-                list.classList.add("functions");
+                const functions = document.createElement("div");
+                functions.className = "functions";
                 list.querySelectorAll("li").forEach(li => {
-                    if (!li.querySelector("a")) li.classList.add("static");
-                    li.querySelectorAll("br").forEach(br => br.replaceWith(" "));
+                    const link = li.querySelector('a[href*="part="]');
+                    const title = (link || li.querySelector("strong")).textContent.trim();
+                    const body = document.createElement("div");
+                    if (link) {
+                        body.innerHTML = i18next.t(`readme_part_${new URL(link.href).searchParams.get("part")}`);
+                        // the part starts with its own title: the summary shows it already
+                        body.firstElementChild?.remove();
+                        body.querySelectorAll("[style]").forEach(el => el.removeAttribute("style"));
+                    } else {
+                        li.querySelector("strong").remove();
+                        li.querySelectorAll("br").forEach(br => br.remove());
+                        const p = document.createElement("p");
+                        p.innerHTML = li.innerHTML.trim();
+                        body.append(p);
+                    }
+                    functions.append(fold(title, body));
                 });
-                const outer = list.parentElement.closest("ul");
-                if (outer) outer.replaceWith(list);
+                (list.parentElement.closest("ul") || list).replaceWith(functions);
             }
 
             // changelog: everything from the heading before the first version into a collapsible block
             const firstVersion = doc.querySelector("h3");
             const title = firstVersion?.previousElementSibling;
             if (title && title.tagName === "H2") {
-                const details = document.createElement("details");
-                const summary = document.createElement("summary");
-                summary.textContent = title.textContent;
                 const body = document.createElement("div");
                 body.className = "changes";
-                details.append(summary, body);
                 let node = title.nextSibling;
                 while (node) {
                     const next = node.nextSibling;
                     body.append(node);
                     node = next;
                 }
+                const details = fold(title.textContent, body);
+                details.classList.add("changelog");
                 title.replaceWith(details);
             }
+        }
+
+        // collapsible card: title row with a chevron, body below
+        function fold(title, body) {
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+            summary.textContent = title;
+            body.classList.add("fold-body");
+            details.append(summary, body);
+            return details;
         }
 
         // "classic" = the interface before iOS 26 from ./old/, the calculator page switches on start
