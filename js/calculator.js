@@ -467,9 +467,11 @@ function btnHandler(target) {
                 if (target.id === "=") {
                     add2MagicHistory(resultValue.toString());
                     if (!Object.is(calculatedValue, resultValue)) {
-                        // forced result: continue from it, the line above shows it as a typed number
+                        // forced result: continue from it; the line above keeps the example with its first
+                        // number swapped so the example gives the forced result, otherwise shows the number alone
                         calcSum = resultValue;
-                        expressionLine = formatOperand(resultValue.toString());
+                        expressionLine = (expressionLine !== null && forceExpressionLine(expressionLine, resultValue))
+                            || formatOperand(resultValue.toString());
                     }
                     if (expressionLine !== null) {
                         setExpressionLine(expressionLine);
@@ -672,6 +674,75 @@ function displayValue(value, showAsIs = false) {
     do {
         displayEl.className = "displayS" + sizeIndex;
     } while (sizeIndex++ < 12 && displayEl.scrollWidth > displayEl.clientWidth);
+}
+
+// the example with its first number recalculated so that it gives target (× and ÷ before + and −);
+// null if that number would look suspicious: a fraction instead of a whole number or a changed sign
+function forceExpressionLine(line, target) {
+    let parts = splitExpression(line);
+    if (!parts) {
+        return null;
+    }
+    let { operands, operators } = parts;
+    let i = 0;
+    // first term: first × a ÷ b ... = first × factor
+    let factor = 1;
+    for (; i < operators.length && (operators[i] === "×" || operators[i] === "÷"); i++) {
+        factor = operators[i] === "×" ? factor * operands[i + 1] : factor / operands[i + 1];
+    }
+    // everything after the first term
+    let rest = 0;
+    while (i < operators.length) {
+        let sign = operators[i] === "+" ? 1 : -1;
+        let term = operands[++i];
+        for (; i < operators.length && (operators[i] === "×" || operators[i] === "÷"); i++) {
+            term = operators[i] === "×" ? term * operands[i + 1] : term / operands[i + 1];
+        }
+        rest += sign * term;
+    }
+    let first = roundValue((target - rest) / factor);
+    let original = operands[0];
+    if (!Number.isFinite(first) || Number.isInteger(original) && !Number.isInteger(first) || (first < 0) !== (original < 0)) {
+        return null;
+    }
+    return formatOperand(first.toString()) + line.slice(parts.firstText.length);
+}
+
+// the expression line back into numbers and operators; null if any part is not a number
+function splitExpression(line) {
+    let texts = [];
+    let operators = [];
+    let current = "";
+    let depth = 0;
+    for (let ch of line) {
+        if (ch === "(") {
+            depth++;
+        } else if (ch === ")") {
+            depth--;
+        }
+        if (depth === 0 && "+−×÷".includes(ch)) {
+            texts.push(current);
+            operators.push(ch);
+            current = "";
+        } else {
+            current += ch;
+        }
+    }
+    texts.push(current);
+    let operands = texts.map(parseOperand);
+    return operands.every(Number.isFinite) ? { operands, operators, firstText: texts[0] } : null;
+}
+
+const numberParts = formatter.formatToParts(1234567.5);
+const groupSeparator = numberParts.find(part => part.type === "group")?.value;
+const decimalSeparator = numberParts.find(part => part.type === "decimal")?.value || ".";
+
+function parseOperand(text) {
+    if (groupSeparator) {
+        text = text.split(groupSeparator).join("");
+    }
+    text = text.replace(/[()\s‎‏؜]/g, "").replace(/−/g, "-").split(decimalSeparator).join(".");
+    return /^-?\d+(\.\d*)?$/.test(text) ? Number(text) : Number.NaN;
 }
 
 function setExpressionLine(text) {

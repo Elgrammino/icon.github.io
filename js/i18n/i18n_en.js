@@ -60,7 +60,7 @@ const i18n_en = {
             </ul>
             <p>The function does not work in remote control mode for the spectator's phone.</p>`,
         "readme_part_3": `<p style="text-align: center;"><strong>(+) Toxic force</strong></p>
-            <p>Enter the <strong>NUMBER</strong> and enable the function. After this, the application will wait for the = button to be pressed, and no matter what operations are calculated, the result of the calculation will always be your entered <strong>NUMBER</strong>.</p>
+            <p>Enter the <strong>NUMBER</strong> and enable the function. After this, the application will wait for the = button to be pressed, and no matter what operations are calculated, the result of the calculation will always be your entered <strong>NUMBER</strong>. The example above the result stays, but its first number is quietly changed so that the example gives your <strong>NUMBER</strong>. If that would make the first number a fraction or change its sign, only the <strong>NUMBER</strong> is shown above the result.</p>
             <p>In remote control, you just need to do the same on your phone and the function will turn on on the viewer&rsquo;s device.</p>`,
         "readme_part_4": `<p style="text-align: center;"><strong>(-) DD force</strong></p>
             <p>Or display down force. Designed to force a <strong>NUMBER</strong>&nbsp;by bringing the result of calculations to the force using &ldquo;blind input of a random number&rdquo;.</p>
