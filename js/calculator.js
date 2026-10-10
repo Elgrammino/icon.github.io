@@ -103,7 +103,7 @@ for (el of buttonElList) {
     el.addEventListener("pointercancel", cancelBtnHandler);
 }
 
-// keys without function: only the glass press animation
+// top keys: glass press animation; the clock opens the history, the calculator key has no function
 for (el of [document.getElementById("historyKey"), document.getElementById("modeKey")]) {
     el.addEventListener("pointerdown", e => {
         e.currentTarget.classList.remove("pushOff");
@@ -116,10 +116,41 @@ for (el of [document.getElementById("historyKey"), document.getElementById("mode
             e.currentTarget.classList.add("pushOff");
             if (e.type === "pointerup") {
                 feedback();
+                if (e.currentTarget.id === "historyKey") {
+                    openHistory();
+                } else {
+                    armDDFManual();
+                }
             }
         });
     }
 }
+
+// one tap on the calculator key with a typed number = hold "−" and then hold "0":
+// the number becomes the DD force, the screen goes back to 0 and the next touches type it digit by digit.
+// Set up directly instead of applyDDForce(): its "no orientation access" pop-up is not needed in manual mode
+function armDDFManual() {
+    if (isClientMode() || !isDigitsTyping) {
+        return;
+    }
+    let value = getVisibleValue();
+    disableMagic();
+    if (isRCEnabled()) {
+        sendRCData({ type: "-", payload: value });
+        sendRCData({ type: "0" });
+    } else {
+        setMagicDDFResult(value);
+        isMagicDDFAuto = false;
+        isMagicDDFManualTimeout = false;
+        overlayDDFEl.classList.remove("hidden");
+    }
+    reset();
+    feedback(true);
+}
+
+// the hidden history peek (long press on "=") is replaced by the visible history:
+// switch off its notifications if they were left on (read by magic.js, which loads after this file)
+localStorage.removeItem("isMagicHistoryEnabled");
 
 // DDF with a mixed expression (a + b × ?): magic.js counts left to right, so for the duration
 // of its tap the pending part is shown to it as "+" with a left value giving the same final result
@@ -319,7 +350,8 @@ function startBtnHandler(e) {
         longPressTimer = null;
         longPressTarget = null;
     }
-    if (pushedBtnsCount === 1) {
+    // "=" has no hidden function any more: history is behind the clock key
+    if (pushedBtnsCount === 1 && target.id !== "=") {
         longPressTimer = setTimeout(_ => {
             feedback(true);
             longPressTarget = target;
@@ -475,6 +507,7 @@ function btnHandler(target) {
                     }
                     if (expressionLine !== null) {
                         setExpressionLine(expressionLine);
+                        addHistoryEntry(expressionLine, resultValue);
                     }
                 } else {
                     setExpressionLine("");
@@ -784,3 +817,205 @@ function reset() {
     add2MagicHistory(inputValue);
     add2MagicHistory("\n");
 }
+// ---------- history (clock key), as in the iOS 26 Calculator ----------
+// every "=" is saved with the example exactly as it was shown (forced results included),
+// the sheet opens half height and can be pulled up to the whole screen
+
+const historyStorageKey = "calcHistory";
+const historyMaxEntries = 200;
+const historySheetEl = document.getElementById("historySheet");
+const historyPanelEl = historySheetEl.querySelector(".historyPanel");
+const historyListEl = document.getElementById("historyList");
+const historyEditEl = document.getElementById("historyEdit");
+const historyClearEl = document.getElementById("historyClear");
+let historyCloseTimer;
+
+function loadHistory() {
+    try {
+        let entries = JSON.parse(localStorage.getItem(historyStorageKey));
+        return Array.isArray(entries) ? entries : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveHistory(entries) {
+    try {
+        localStorage.setItem(historyStorageKey, JSON.stringify(entries.slice(0, historyMaxEntries)));
+    } catch (e) { }
+}
+
+function addHistoryEntry(line, value) {
+    // iOS keeps only real examples: a lone number or an error is not saved
+    if (!Number.isFinite(value) || !/[+−×÷]/.test(line)) {
+        return;
+    }
+    let entries = loadHistory();
+    entries.unshift({ t: Date.now(), e: line, r: value.toString() });
+    saveHistory(entries);
+}
+
+function historyGroupTitle(time) {
+    let date = new Date(time);
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let days = (today - new Date(date).setHours(0, 0, 0, 0)) / 86400000;
+    if (days <= 0) {
+        return i18next.t("historyToday");
+    } else if (days <= 7) {
+        return i18next.t("historyWeek");
+    } else if (days <= 30) {
+        return i18next.t("historyMonth");
+    }
+    let options = date.getFullYear() === today.getFullYear() ? { month: "long" } : { month: "long", year: "numeric" };
+    let title = date.toLocaleString(navigator.language, options);
+    return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
+function renderHistory() {
+    let entries = loadHistory();
+    historyListEl.textContent = "";
+    historyEditEl.disabled = !entries.length;
+    if (!entries.length) {
+        setHistoryEditing(false);
+        let empty = document.createElement("div");
+        empty.className = "historyEmpty";
+        empty.textContent = i18next.t("historyEmpty");
+        historyListEl.append(empty);
+        return;
+    }
+    let group = null;
+    entries.forEach((entry, index) => {
+        let title = historyGroupTitle(entry.t);
+        if (title !== group) {
+            group = title;
+            let header = document.createElement("h2");
+            header.textContent = title;
+            historyListEl.append(header);
+        }
+        let row = document.createElement("div");
+        row.className = "historyRow";
+        row.innerHTML = '<div class="historyDelete"></div><div class="historyText"><div class="historyExpression"></div><div class="historyResult"></div></div>';
+        row.querySelector(".historyExpression").textContent = entry.e;
+        row.querySelector(".historyResult").textContent = formatValue(entry.r);
+        // pointerup instead of click (ontouchend cancels clicks on iOS); scrolling the list cancels the pointer
+        row.addEventListener("pointerup", e => {
+            if (historyListEl.classList.contains("editing")) {
+                if (e.target.classList.contains("historyDelete")) {
+                    let list = loadHistory();
+                    list.splice(index, 1);
+                    saveHistory(list);
+                    renderHistory();
+                }
+            } else {
+                useHistoryEntry(entry);
+            }
+        });
+        historyListEl.append(row);
+    });
+}
+
+// the chosen result comes back to the screen as if "=" had just been pressed
+function useHistoryEntry(entry) {
+    let value = Number(entry.r);
+    reset();
+    calcSum = value;
+    lastOperand = value;
+    resultValue = value;
+    operation = "=";
+    resetEl.innerText = "C";
+    setExpressionLine(entry.e);
+    displayValue(resultValue.toString());
+    feedback();
+    closeHistory();
+}
+
+function setHistoryEditing(isEditing) {
+    historyListEl.classList.toggle("editing", isEditing);
+    historyEditEl.textContent = i18next.t(isEditing ? "historyDone" : "historyEdit");
+    historyClearEl.textContent = i18next.t("historyClear");
+    historyClearEl.classList.toggle("hidden", !isEditing);
+}
+
+function openHistory() {
+    clearTimeout(historyCloseTimer);
+    setHistoryEditing(false);
+    renderHistory();
+    historyListEl.scrollTop = 0;
+    historySheetEl.className = "closed";
+    historySheetEl.offsetHeight; // start the slide from below
+    historySheetEl.className = "";
+}
+
+function closeHistory() {
+    historySheetEl.className = historySheetEl.classList.contains("large") ? "large closed" : "closed";
+    historyCloseTimer = setTimeout(_ => historySheetEl.className = "hidden closed", 450);
+}
+
+historySheetEl.querySelector(".historyBackdrop").addEventListener("pointerup", closeHistory);
+document.getElementById("historyClose").addEventListener("pointerup", closeHistory);
+historyEditEl.addEventListener("pointerup", _ => setHistoryEditing(!historyListEl.classList.contains("editing")));
+historyClearEl.addEventListener("pointerup", _ => {
+    showMessage(i18next.t("historyClearAsk"), [i18next.t("cancel"), i18next.t("historyClear")]).then(choice => {
+        if (choice === 1) {
+            saveHistory([]);
+            renderHistory();
+        }
+    });
+});
+
+// pulling the grabber: up to the whole screen, down to half height or away
+(_ => {
+    const headEl = historySheetEl.querySelector(".historyHead");
+    let startY = null;
+    let startTime;
+    let startTop;
+    let deltaY = 0;
+    headEl.addEventListener("pointerdown", e => {
+        if (e.target.closest("button")) {
+            return;
+        }
+        startY = e.clientY;
+        startTime = e.timeStamp;
+        startTop = historyPanelEl.getBoundingClientRect().top;
+        deltaY = 0;
+        historySheetEl.classList.add("dragging");
+        headEl.setPointerCapture(e.pointerId);
+    });
+    headEl.addEventListener("pointermove", e => {
+        if (startY === null) {
+            return;
+        }
+        deltaY = e.clientY - startY;
+        let isLarge = historySheetEl.classList.contains("large");
+        if (deltaY < 0 && !isLarge) {
+            historyPanelEl.style.top = Math.max(startTop + deltaY, 40) + "px";
+            historyPanelEl.style.transform = "";
+        } else {
+            historyPanelEl.style.top = "";
+            historyPanelEl.style.transform = "translateY(" + (deltaY < 0 ? deltaY / 5 : deltaY) + "px)";
+        }
+    });
+    for (let type of ["pointerup", "pointercancel"]) {
+        headEl.addEventListener(type, e => {
+            if (startY === null) {
+                return;
+            }
+            let speed = deltaY / Math.max(e.timeStamp - startTime, 1);
+            let isLarge = historySheetEl.classList.contains("large");
+            startY = null;
+            historySheetEl.classList.remove("dragging");
+            historyPanelEl.style.top = "";
+            historyPanelEl.style.transform = "";
+            if (deltaY < -40 || speed < -0.5) {
+                historySheetEl.classList.add("large");
+            } else if (deltaY > 60 || speed > 0.5) {
+                if (isLarge && deltaY < window.innerHeight * 0.45) {
+                    historySheetEl.classList.remove("large");
+                } else {
+                    closeHistory();
+                }
+            }
+        });
+    }
+})();

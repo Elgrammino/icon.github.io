@@ -101,6 +101,22 @@
         </div>
         <div class="calcOffset"></div>
     </div>
+    <div id="historySheet" class="hidden">
+        <div class="historyBackdrop"></div>
+        <div class="historyPanel" role="dialog" aria-modal="true">
+            <div class="historyHead">
+                <div class="historyGrabber"></div>
+                <div class="historyBar">
+                    <button type="button" class="historyPill" id="historyEdit"></button>
+                    <button type="button" class="historyPill hidden" id="historyClear"></button>
+                    <button type="button" class="historyRound" id="historyClose" aria-label="Close">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="historyList" id="historyList"></div>
+        </div>
+    </div>
 </body>
 
 </html>

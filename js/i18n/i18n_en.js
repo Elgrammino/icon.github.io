@@ -25,6 +25,14 @@ const i18n_en = {
         "ddForceManualDisabled": "Manual mode OFF",
         "toxicForceIsEnabled": "TOXIC Force ON",
         "history": "History",
+        "historyEdit": "Edit",
+        "historyDone": "Done",
+        "historyClear": "Clear",
+        "historyClearAsk": "Clear all history?",
+        "historyEmpty": "No History",
+        "historyToday": "Today",
+        "historyWeek": "Previous 7 Days",
+        "historyMonth": "Previous 30 Days",
         "dd": "Touches left",
         "alert": "Alert",
         "readme_part_1": `<div>
@@ -77,14 +85,17 @@ const i18n_en = {
             </ul>
             <p>If the application has access (if not, then after enabling the function the application will notify about it) to the orientation of the device in space, then the mode will be <strong>automatic</strong>. At this moment, clicking on the screen causes a number to appear that is necessary to calculate the forced <strong>NUMBER</strong>. Formula: (any_calculations)&lt;any_operation&gt;X=<strong>NUMBER</strong>. Where X is the number that will be substituted for clicks on the screen. The required number is adapted to the last operation before turning the device over. But it is advisable to use + or -. In the case of the &times; and &divide; operations, the result of the calculation may not be accurate when duplicated on other calculators due to the nature of irrational numbers.</p>
             <p>If notifications are enabled or X=<strong>NUMBER</strong>, then X will be entered one digit for each touch on the screen while input is blocked. The number of required touches will be displayed in notifications if available. If not, the X will be displayed in its entirety the first time you tap on the screen.&nbsp;Each tap on the screen will trigger an animation of pressing the desired button. This allows to broadcast phone screen to a large screen on stage.</p>
-            <p>In remote control mode, you get information about remaining clicks or missing permissions to access the viewer's device orientation. You can also enable "display down mode" for the viewer's phone manually or automatically if you allow access on the viewer's phone in advance if required. Similar to other features, you control when to enable this feature on the viewer's device.</p>`,
-        "readme_part_5": `<p style="text-align: center;"><strong>(=)&nbsp;History peek</strong></p>
-            <p>Peeking function or input history. When you first open the app, you'll be asked for permission to access your device's notifications. Depending on the answer,&nbsp;history works in two modes:</p>
+            <p>In remote control mode, you get information about remaining clicks or missing permissions to access the viewer's device orientation. You can also enable "display down mode" for the viewer's phone manually or automatically if you allow access on the viewer's phone in advance if required. Similar to other features, you control when to enable this feature on the viewer's device.</p>
+            <p><strong>Quick entry (iOS 26 look).</strong> Type a number and tap the calculator key in the top right corner once. The number disappears, the screen shows 0 and manual mode is on at once: touching the screen types the number one digit at a time. It is the same as holding "−" and then "0", without holding. Numbers 0 to 9 work as the date and time in N minutes.</p>`,
+        "readme_part_5": `<p style="text-align: center;"><strong>History</strong></p>
+            <p>In the iOS 26 look the history opens with the clock key in the top left corner, just like in the real iPhone Calculator. The hidden function on the "=" key is gone: you can peek openly, it looks natural.</p>
             <ul>
-            <li><strong>Allowed</strong> - turns on/off the history function and the application will display the history in device notifications after any actions. This allows you to get the history on your watch in real time without touching your phone.</li>
-            <li><strong>Not allowed</strong> - leads to a one-time pop-up window with the input history.</li>
+            <li>Every example is saved after "=" exactly as it was on the screen, including a result changed by TOXIC Force or DD Force.</li>
+            <li>The sheet opens at half height; pull it up to cover the whole screen, pull it down to close it.</li>
+            <li>Tapping a line brings its result back to the calculator.</li>
+            <li>"Edit" lets you delete single lines and shows the "Clear" button.</li>
             </ul>
-            <p>In remote control mode, turns on/off the story on the viewer&rsquo;s phone. Information will come to you in the form of notifications.</p>`,
+            <p>The classic look keeps the old function: holding "=" shows the input history in a pop-up or in notifications.</p>`,
         "readme_part_6": `<p style="text-align: center;"><strong>(.)&nbsp;Memory</strong></p>
             <p>This feature is enabled by using the fractional separator symbol, which is between <strong>0</strong> and <strong>=</strong>. All force functions operate continuously when the memory function is enabled. Even if you restart the application. After switching on/off, all forces are reset. Thus, after enabling the memory function, you also need to enable one or another force function at your discretion.</p>`,
         "readme": `<p style="text-align: center;"><strong>Copyright</strong></p>
@@ -104,7 +115,7 @@ const i18n_en = {
             <li style="text-align: justify;"><a href="readme.html?part=2"><strong>(%) Numerology</strong></a></li>
             <li style="text-align: justify;"><a href="readme.html?part=3"><strong>(+) Toxic force</strong></a></li>
             <li style="text-align: justify;"><a href="readme.html?part=4"><strong>(-) DD force</strong></a></li>
-            <li style="text-align: justify;"><a href="readme.html?part=5"><strong>(=) History peek</strong></a></li>
+            <li style="text-align: justify;"><a href="readme.html?part=5"><strong>History</strong></a></li>
             <li style="text-align: justify;"><a href="readme.html?part=6"><strong>(.) Memory</strong></a></li>
             </ul>
             </ul>

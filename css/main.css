@@ -542,7 +542,245 @@ body {
     outline-offset: 2px;
 }
 
+/* ---------- history sheet (clock key), as in the iOS 26 Calculator ----------
+   Measured on iPhone Pro Max screenshots: half height it floats with a 9 pt margin over blurred keys,
+   pulled up it covers the screen below the status bar. Rows 84 pt, side padding 21 pt,
+   expression 13.5 pt gray, result 20 pt white, section titles 17 pt semibold gray. */
+
+#historySheet {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+}
+
+.historyBackdrop {
+    position: absolute;
+    inset: 0;
+}
+
+.historyPanel {
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 47%;
+    bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    border-radius: 2.6rem;
+    background: rgb(36 36 38 / 86%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(22px) saturate(150%);
+    box-shadow:
+        inset 0 0.05rem 0.05rem rgb(255 255 255 / 14%),
+        inset 0 0 0 0.04rem rgb(255 255 255 / 8%),
+        0 -0.4rem 2rem rgb(0 0 0 / 35%);
+    overflow: hidden;
+    transform: translateY(0);
+    transition:
+        transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        top 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        left 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        right 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        bottom 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        border-radius 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        background-color 0.42s ease;
+}
+
+#historySheet.closed .historyPanel {
+    transform: translateY(calc(100% + 1rem));
+}
+
+#historySheet.large .historyPanel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: calc(max(env(safe-area-inset-top), 0.8rem) + 0.1rem);
+    border-radius: 2.4rem 2.4rem 0 0;
+    background: rgb(28 28 30 / 97%);
+}
+
+#historySheet.dragging .historyPanel {
+    transition: none;
+}
+
+.historyHead {
+    flex: none;
+    padding: 0.35rem 1.1rem 0;
+    touch-action: none;
+}
+
+.historyGrabber {
+    width: 2rem;
+    height: 0.28rem;
+    margin: 0 auto;
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 30%);
+}
+
+.historyBar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+}
+
+.historyPill,
+.historyRound {
+    height: 2.45rem;
+    border: 0;
+    border-radius: 999px;
+    color: var(--text);
+    background: rgb(255 255 255 / 7%);
+    box-shadow:
+        inset 0 0.05rem 0.05rem rgb(255 255 255 / 16%),
+        inset 0 0 0 0.04rem rgb(255 255 255 / 10%);
+    font-family: var(--font);
+    font-weight: 500;
+    font-size: 0.97rem;
+    touch-action: manipulation;
+    transition: transform 0.08s ease-out, background-color 0.1s ease-out;
+}
+
+.historyPill {
+    padding: 0 1.15rem;
+}
+
+.historyPill.hidden {
+    display: none;
+}
+
+.historyPill:disabled {
+    color: rgb(255 255 255 / 30%);
+}
+
+.historyRound {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.45rem;
+    margin-left: auto;
+    padding: 0;
+}
+
+.historyRound svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+}
+
+.historyPill:active,
+.historyRound:active {
+    transform: scale(1.08);
+    background: rgb(255 255 255 / 16%);
+}
+
+.historyList {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    padding: 0 1.18rem calc(1rem + env(safe-area-inset-bottom));
+    font-family: var(--font);
+}
+
+.historyList h2 {
+    margin: 1.85rem 0 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.03rem solid rgb(255 255 255 / 16%);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.97rem;
+}
+
+.historyRow {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    height: 4.7rem;
+    border-bottom: 0.03rem solid rgb(255 255 255 / 16%);
+    transition: opacity 0.1s ease-out;
+}
+
+.historyRow:active {
+    opacity: 0.55;
+}
+
+.historyText {
+    flex: 1;
+    min-width: 0;
+}
+
+.historyExpression,
+.historyResult {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.historyExpression {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.78rem;
+    line-height: 1.2rem;
+}
+
+.historyResult {
+    color: var(--text);
+    font-weight: 500;
+    font-size: 1.12rem;
+    line-height: 1.5rem;
+}
+
+.historyDelete {
+    display: none;
+    flex: none;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: #FF453A;
+    position: relative;
+}
+
+.historyDelete::after {
+    content: "";
+    position: absolute;
+    left: 0.3rem;
+    right: 0.3rem;
+    top: calc(50% - 0.07rem);
+    height: 0.14rem;
+    border-radius: 0.1rem;
+    background: #FFF;
+}
+
+.editing .historyDelete {
+    display: block;
+}
+
+.editing .historyRow:active {
+    opacity: 1;
+}
+
+.historyEmpty {
+    margin-top: 4rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.97rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .historyPanel {
+        transition: opacity 0.2s linear;
+    }
+
+    #historySheet.closed .historyPanel {
+        transform: none;
+        opacity: 0;
+    }
+
     .pushOff,
     .topKey {
         transition: background-color 0.3s linear;
