@@ -103,7 +103,7 @@ for (el of buttonElList) {
     el.addEventListener("pointercancel", cancelBtnHandler);
 }
 
-// top keys: glass press animation; the clock opens the history, the calculator key has no function
+// top keys: glass press animation; the clock opens the history, the calculator key arms DDF (armDDFManual in magicios26.js)
 for (el of [document.getElementById("historyKey"), document.getElementById("modeKey")]) {
     el.addEventListener("pointerdown", e => {
         e.currentTarget.classList.remove("pushOff");
@@ -123,72 +123,6 @@ for (el of [document.getElementById("historyKey"), document.getElementById("mode
                 }
             }
         });
-    }
-}
-
-// one tap on the calculator key with a typed number = hold "−" and then hold "0":
-// the number becomes the DD force, the screen goes back to 0 and the next touches type it digit by digit.
-// Set up directly instead of applyDDForce(): its "no orientation access" pop-up is not needed in manual mode
-function armDDFManual() {
-    if (isClientMode() || !isDigitsTyping) {
-        return;
-    }
-    let value = getVisibleValue();
-    disableMagic();
-    if (isRCEnabled()) {
-        sendRCData({ type: "-", payload: value });
-        sendRCData({ type: "0" });
-    } else {
-        setMagicDDFResult(value);
-        isMagicDDFAuto = false;
-        isMagicDDFManualTimeout = false;
-        overlayDDFEl.classList.remove("hidden");
-    }
-    reset();
-    feedback(true);
-}
-
-// the hidden history peek (long press on "=") is replaced by the visible history:
-// switch off its notifications if they were left on (read by magic.js, which loads after this file)
-localStorage.removeItem("isMagicHistoryEnabled");
-
-// DDF with a mixed expression (a + b × ?): magic.js counts left to right, so for the duration
-// of its tap the pending part is shown to it as "+" with a left value giving the same final result
-let ddfPendingOperation = null;
-window.addEventListener("pointerdown", e => {
-    if (e.target.id !== "overlayDDF" || !magicDDFResult || !(operation === "x" || operation === "÷") || calcSum === 0) {
-        return;
-    }
-    convertDDFTimeForce();
-    let force = Number(magicDDFResult);
-    if (!Number.isFinite(force) || force === calcSum) {
-        return;
-    }
-    let operand = roundValue(operation === "x" ? (force - calcSum) / calcTerm : calcTerm / (force - calcSum));
-    if (!Number.isFinite(operand)) {
-        return;
-    }
-    ddfPendingOperation = operation;
-    operation = "+";
-    resultValue = force - operand;
-}, true);
-window.addEventListener("pointerdown", _ => {
-    if (ddfPendingOperation) {
-        operation = ddfPendingOperation;
-        ddfPendingOperation = null;
-        syncResultValue();
-    }
-});
-
-// same conversion magic.js does on the first tap: force 0..9 means date and time in N minutes
-function convertDDFTimeForce() {
-    let forceValueNumber = Number(magicDDFResult);
-    if (forceValueNumber >= 0 && forceValueNumber <= 9) {
-        let forceTime = new Date(((new Date()).getTime() + 60000 * (forceValueNumber === 0 ? 1 : forceValueNumber)));
-        magicDDFResult = forceTime.getDate().toLocaleString(navigator.language, { minimumIntegerDigits: 2 })
-            + (forceTime.getMonth() + 1).toLocaleString(navigator.language, { minimumIntegerDigits: 2 })
-            + forceTime.getHours().toLocaleString(navigator.language, { minimumIntegerDigits: 2 })
-            + forceTime.getMinutes().toLocaleString(navigator.language, { minimumIntegerDigits: 2 });
     }
 }
 

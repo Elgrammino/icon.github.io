@@ -1,7 +1,7 @@
 // Offline: all files are saved on the phone at first launch and served from there.
 // When any file changes, bump the version here AND in js/version.js,
 // otherwise users keep the old version from the cache.
-const CACHE_NAME = "calculator-1.78";
+const CACHE_NAME = "calculator-1.80";
 
 // paths are relative to sw.js
 const ASSETS = [
@@ -19,6 +19,7 @@ const ASSETS = [
     "./js/peerjs.min.js",
     "./js/calculator.js",
     "./js/magic.js",
+    "./js/magicios26.js",
     "./js/rc.js",
     "./old/",
     "./old/index.html",

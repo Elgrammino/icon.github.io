@@ -73,6 +73,7 @@ const i18n_en = {
         "readme_part_4": `<p style="text-align: center;"><strong>(-) DD force</strong></p>
             <p>Or display down force. Designed to force a <strong>NUMBER</strong>&nbsp;by bringing the result of calculations to the force using &ldquo;blind input of a random number&rdquo;.</p>
             <p>Enter the required <strong>NUMBER</strong> for the force and enable the function (Button = disables the function and leads to the required result):</p>
+            <p>Until the input has been blocked, = does not disable the function. You can add up the spectators' numbers and show the sum (e.g. 13+145+123+543 = 824), then press + and hold 0: the blind input adds the number that turns the sum into the forced <strong>NUMBER</strong>.</p>
             <ul>
             <li><strong>0</strong> was entered. The result should be a number&nbsp;in the format <strong>&lt;DayMonthHoursMinutes&gt; + 1</strong> minute delay. The number is calculated based on the date/time on your device.</li>
             <li><strong>1-9</strong> was entered. The result should be a number in the format <strong>&lt;DayMonthHoursMinutes&gt; +</strong> the entered <strong>NUMBER</strong> of delay minutes. The number is calculated based on the date/time on your device.</li>
