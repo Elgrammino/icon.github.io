@@ -687,25 +687,56 @@ body {
 }
 
 .historyList h2 {
+    position: relative;
     margin: 1.85rem 0 0;
     padding-bottom: 0.75rem;
-    border-bottom: 0.03rem solid rgb(255 255 255 / 16%);
     color: var(--text-secondary);
     font-weight: 600;
     font-size: 0.97rem;
 }
 
+/* a tapped or chosen row lights up from edge to edge, the separator keeps the side padding */
 .historyRow {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.95rem;
     height: 4.7rem;
-    border-bottom: 0.03rem solid rgb(255 255 255 / 16%);
-    transition: opacity 0.1s ease-out;
+    margin: 0 -1.18rem;
+    padding: 0 1.18rem;
+    transition: background-color 0.1s ease-out;
 }
 
-.historyRow:active {
-    opacity: 0.55;
+.historyRow::after {
+    content: "";
+    position: absolute;
+    left: 1.18rem;
+    right: 1.18rem;
+    bottom: 0;
+    border-bottom: 0.03rem solid rgb(255 255 255 / 16%);
+}
+
+.historyRow:active,
+.historyRow.selected {
+    background-color: rgb(255 255 255 / 10%);
+}
+
+/* editing: the separators start at the text, after the circles */
+.editing .historyRow::after {
+    left: 3.43rem;
+}
+
+.historyList h2::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-bottom: 0.03rem solid rgb(255 255 255 / 16%);
+}
+
+.editing h2::after {
+    left: 2.25rem;
 }
 
 .historyText {
@@ -734,33 +765,106 @@ body {
     line-height: 1.5rem;
 }
 
-.historyDelete {
+/* editing: a circle before every row, filled gray with a ✓ when chosen */
+.historySelect {
     display: none;
     flex: none;
     width: 1.3rem;
     height: 1.3rem;
     border-radius: 50%;
-    background: #FF453A;
-    position: relative;
+    box-shadow: inset 0 0 0 0.1rem rgb(255 255 255 / 30%);
 }
 
-.historyDelete::after {
-    content: "";
-    position: absolute;
-    left: 0.3rem;
-    right: 0.3rem;
-    top: calc(50% - 0.07rem);
-    height: 0.14rem;
-    border-radius: 0.1rem;
-    background: #FFF;
-}
-
-.editing .historyDelete {
+.editing .historySelect {
     display: block;
 }
 
-.editing .historyRow:active {
+.historyRow.selected .historySelect {
+    box-shadow: none;
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6.5 12.5l3.6 3.6 7.4-8' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 75% no-repeat,
+        #8E8E93;
+}
+
+/* editing: orange round ✓ on the left (instead of "Edit"), red "Clear All" / "Delete (N)" on the right */
+.historyDone {
+    margin-left: 0;
+    color: #FFE45C;
+    background: #F09A37;
+    box-shadow: inset 0 0.05rem 0.05rem rgb(255 255 255 / 35%);
+}
+
+.historyDone svg {
+    stroke-width: 3.2;
+}
+
+.historyDone:active {
+    background: #F5AE5C;
+}
+
+.historyRound.hidden {
+    display: none;
+}
+
+.historyDanger {
+    margin-left: auto;
+    color: #FF6961;
+}
+
+/* "Clear All" asks in a card next to the button, as in iOS 26 */
+.historyConfirm {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+}
+
+.historyConfirmCard {
+    position: absolute;
+    width: 13.4rem;
+    padding: 1.15rem 0.95rem 0.95rem;
+    border-radius: 1.75rem;
+    background: rgb(44 42 40 / 95%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+    box-shadow:
+        inset 0 0.05rem 0.05rem rgb(255 255 255 / 14%),
+        inset 0 0 0 0.04rem rgb(255 255 255 / 10%),
+        0 0.6rem 2.2rem rgb(0 0 0 / 45%);
+    opacity: 0;
+    transform: scale(0.9);
+    transform-origin: 85% 50%;
+    transition: opacity 0.18s ease-out, transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.historyConfirm.show .historyConfirmCard {
     opacity: 1;
+    transform: scale(1);
+}
+
+.historyConfirmCard p {
+    margin: 0 0.6rem 1.1rem;
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: 500;
+    font-size: 0.95rem;
+    line-height: 1.3rem;
+}
+
+.historyConfirmCard button {
+    width: 100%;
+    height: 2.85rem;
+    border: 0;
+    border-radius: 999px;
+    color: #FF6961;
+    background: rgb(255 255 255 / 9%);
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 0.97rem;
+    touch-action: manipulation;
+}
+
+.historyConfirmCard button:active {
+    background: rgb(255 255 255 / 18%);
 }
 
 .historyEmpty {
@@ -769,6 +873,236 @@ body {
     color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.97rem;
+}
+
+/* ---------- landscape (phone turned sideways), as on iPhone screenshots IMG_2891/2892 ----------
+   Measured on iPhone Pro Max (932 × 430 pt, here 1rem = 2.1vh ≈ 9 pt): 5 columns of pill keys 47 pt high,
+   9 pt gaps, 75 pt side margins, number 50 pt, example 23 pt. The keys keep their DOM order,
+   the grid puts them in the landscape order: 7 8 9 ⌫ ÷ / 4 5 6 AC × / 1 2 3 % − / ± 0 , = + */
+
+@media (orientation: landscape) and (max-height: 500px) {
+    #calc {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: 1fr repeat(4, auto) auto;
+        gap: 1rem;
+        max-width: none;
+        padding: 0 max(8.3rem, calc(env(safe-area-inset-right) + 1rem)) 0 max(8.3rem, calc(env(safe-area-inset-left) + 1rem));
+    }
+
+    .row {
+        display: contents;
+    }
+
+    .displayArea {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        align-self: end;
+        padding: 0;
+        margin-bottom: 0.4rem;
+    }
+
+    .calcOffset {
+        grid-column: 1 / -1;
+        grid-row: 6;
+        height: calc(1.2rem + env(safe-area-inset-bottom));
+        margin-top: -1rem;
+    }
+
+    .button {
+        width: auto;
+        height: 5.2rem;
+        margin: 0;
+        border-radius: 999px;
+        font-size: 2.9rem;
+    }
+
+    .operation svg {
+        width: 2.9rem;
+        height: 2.9rem;
+    }
+
+    [id="+-"] svg {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    [id="del"] svg {
+        width: 3.2rem;
+        height: 3.2rem;
+    }
+
+    #c.showAC::after {
+        font-size: 2.9rem;
+    }
+
+    [id="%"]>sup {
+        margin-top: 0.6rem;
+    }
+
+    [id="%"]>sub {
+        margin-bottom: 0.6rem;
+    }
+
+    [id="7"] { grid-area: 2 / 1; }
+    [id="8"] { grid-area: 2 / 2; }
+    [id="9"] { grid-area: 2 / 3; }
+    [id="del"] { grid-area: 2 / 4; }
+    [id="÷"] { grid-area: 2 / 5; }
+    [id="4"] { grid-area: 3 / 1; }
+    [id="5"] { grid-area: 3 / 2; }
+    [id="6"] { grid-area: 3 / 3; }
+    [id="c"] { grid-area: 3 / 4; }
+    [id="x"] { grid-area: 3 / 5; }
+    [id="1"] { grid-area: 4 / 1; }
+    [id="2"] { grid-area: 4 / 2; }
+    [id="3"] { grid-area: 4 / 3; }
+    [id="%"] { grid-area: 4 / 4; }
+    [id="-"] { grid-area: 4 / 5; }
+    [id="+-"] { grid-area: 5 / 1; }
+    [id="0"] { grid-area: 5 / 2; }
+    [id="."] { grid-area: 5 / 3; }
+    [id="="] { grid-area: 5 / 4; }
+    [id="+"] { grid-area: 5 / 5; }
+
+    .topKey {
+        top: max(2.8rem, env(safe-area-inset-top));
+        width: 4.9rem;
+        height: 4.9rem;
+    }
+
+    #historyKey {
+        left: max(4.2rem, env(safe-area-inset-left));
+    }
+
+    #modeKey {
+        right: max(4.2rem, env(safe-area-inset-right));
+    }
+
+    .topKey svg {
+        width: 3.2rem;
+        height: 3.2rem;
+    }
+
+    #expression {
+        font-size: 2.5rem;
+        line-height: 3rem;
+        height: 3rem;
+    }
+
+    #display {
+        line-height: 6rem;
+    }
+
+    .displayS1 { font-size: 5.5rem; }
+    .displayP2 { font-size: 4.95rem; }
+    .displayP3 { font-size: 4.45rem; }
+    .displayP4 { font-size: 3.96rem; }
+    .displayP5 { font-size: 3.58rem; }
+    .displayS2 { font-size: 4.6rem; }
+    .displayS3 { font-size: 4.1rem; }
+    .displayS4 { font-size: 3.58rem; }
+    .displayS5 { font-size: 3.14rem; }
+    .displayS6 { font-size: 2.7rem; }
+    .displayS7 { font-size: 2.3rem; }
+    .displayS8 { font-size: 2rem; }
+    .displayS9 { font-size: 1.66rem; }
+    .displayS10 { font-size: 1.4rem; }
+    .displayS11 { font-size: 1.22rem; }
+
+    /* the history floats over the middle of the screen */
+    .historyPanel {
+        left: 22%;
+        right: 22%;
+        top: 1.2rem;
+        bottom: 1.2rem;
+    }
+
+    #historySheet.large .historyPanel {
+        left: 16%;
+        right: 16%;
+        top: 0.6rem;
+        border-radius: 2.4rem 2.4rem 0 0;
+    }
+
+    .historyPill,
+    .historyRound {
+        height: 4.4rem;
+        font-size: 1.75rem;
+    }
+
+    .historyPill {
+        padding: 0 2rem;
+    }
+
+    .historyRound {
+        width: 4.4rem;
+    }
+
+    .historyList h2,
+    .historyEmpty {
+        font-size: 1.75rem;
+    }
+
+    .historyRow {
+        height: 8.4rem;
+    }
+
+    .historyExpression {
+        font-size: 1.4rem;
+        line-height: 2.1rem;
+    }
+
+    .historyResult {
+        font-size: 2rem;
+        line-height: 2.7rem;
+    }
+
+    .historySelect {
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+
+    .editing .historyRow::after {
+        left: 4.53rem;
+    }
+
+    .editing h2::after {
+        left: 3.35rem;
+    }
+
+    .historyConfirmCard {
+        width: 26rem;
+        padding: 2.2rem 1.8rem 1.8rem;
+        border-radius: 3.3rem;
+    }
+
+    .historyConfirmCard p {
+        margin: 0 1.1rem 2rem;
+        font-size: 1.8rem;
+        line-height: 2.5rem;
+    }
+
+    .historyConfirmCard button {
+        height: 5.4rem;
+        font-size: 1.8rem;
+    }
+
+    .messageCard {
+        max-width: 30rem;
+        padding: 2.1rem 1.7rem 1.7rem;
+        border-radius: 3rem;
+    }
+
+    .messageText {
+        font-size: 1.65rem;
+        margin-bottom: 1.9rem;
+    }
+
+    .messageButtons button {
+        min-height: 4.8rem;
+        font-size: 1.65rem;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

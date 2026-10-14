@@ -28,13 +28,36 @@ const i18n_en = {
         "historyEdit": "Edit",
         "historyDone": "Done",
         "historyClear": "Clear",
-        "historyClearAsk": "Clear all history?",
+        "historyClearAsk": "All calculations will be deleted. This action cannot be undone.",
         "historyEmpty": "No History",
         "historyToday": "Today",
         "historyWeek": "Previous 7 Days",
         "historyMonth": "Previous 30 Days",
         "dd": "Touches left",
         "alert": "Alert",
+        "backToSettings": "Settings",
+        "historyClearAll": "Clear All",
+        "historyDelete": "Delete ({{count}})",
+        "historyClearConfirm": "Clear History",
+        "zodiac": ["Capricorn", "Aquarius", "Pisces", "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius"],
+        "settings": "Settings",
+        "savedShort": "Saved",
+        "presets": "Presets",
+        "presetsHint": "Save a number, a way and a digit. Holding that digit for 2 seconds turns the function on with this number, as if it was typed. Up to three presets.",
+        "presetAdd": "+ Add preset",
+        "presetName": "Preset",
+        "presetNumber": "Number",
+        "presetRemove": "Delete preset",
+        "presetKey": "Digit to hold",
+        "presetMode_toxic": "Toxic",
+        "presetMode_ddf": "DDF",
+        "presetMode_ddfManual": "DDF manual",
+        "numberMemory": "Number memory",
+        "numberMemoryHint": "On 0 hold ÷: the calculator remembers number {{n}} typed by hand. Hold ÷ again: the number shows instead of 0 for 3–4 seconds and goes to the history.",
+        "birthday": "Birthday",
+        "birthdayHint": "On 0 hold ×, then the spectator types DD + MM + YYYY =. Hold × again: instead of the example the zodiac sign, days to the birthday and the weekday of birth show for 3–4 seconds.",
+        "instructions": "Instructions",
+        "linkNoId": "Turn on remote control first (hold ±)",
         "readme_part_1": `<div>
             <div style="text-align: center;"><strong>(⁺&frasl;₋) Remote control</strong></div>
             </div>
@@ -63,7 +86,7 @@ const i18n_en = {
         "readme_part_2": `<p style="text-align: center;"><strong>(%) Numerology</strong></p>
             <p>Allows you to calculate the number of fate in numerology. Enter a <strong>NUMBER</strong> and enable the function. The negative sign and fraction sign will be ignored. After enabling the function, instead of the % sign, 2 digits, for 1 second, separated by a slash, will appear.</p>
             <ul>
-            <li>The top one is the number of fate, and is also the remainder of &lt;<strong>NUMBER</strong>/9&gt;. More detailed information can be found in the book Numerologic forces by Nico Heinrich</li>
+            <li>In the iOS 26 look the top one is the plain sum of all digits of the <strong>NUMBER</strong>, not reduced to one digit: 12345678 → 45. In the classic look the top one is the number of fate, the remainder of &lt;<strong>NUMBER</strong>/9&gt; (45 → 9). More detailed information can be found in the book Numerologic forces by Nico Heinrich</li>
             <li>The bottom one is the result of the expression &lt;9-the number of fate&gt;. This number is used to show the "Multiple of 9" effect and similar. For example. We ask the viewer to multiply the numbers randomly until we get a number with 7-9 digits. 2 multiplied by 7 multiplied by 5 multiplied, etc. different numbers every time. If the result is 122333444, and the viewer thinks the 4th digit is equal to 3, then the viewer must pronounce the numbers 1,2,2,3,3,4,4,4 (without the intended digit) in any order. By entering these numbers into the calculator and turning on the function, we will see below the number conceived by the viewer. If 9 is displayed, then the viewer could have intended either 9 or 0. To determine, use any phishing method.</li>
             </ul>
             <p>The function does not work in remote control mode for the spectator's phone.</p>`,
@@ -94,9 +117,33 @@ const i18n_en = {
             <li>Every example is saved after "=" exactly as it was on the screen, including a result changed by TOXIC Force or DD Force.</li>
             <li>The sheet opens at half height; pull it up to cover the whole screen, pull it down to close it.</li>
             <li>Tapping a line brings its result back to the calculator.</li>
-            <li>"Edit" lets you delete single lines and shows the "Clear" button.</li>
+            <li>"Edit" shows circles next to the lines. Mark lines and tap "Delete (N)", or tap "Clear All" and confirm with "Clear History". The orange check mark ends editing.</li>
             </ul>
             <p>The classic look keeps the old function: holding "=" shows the input history in a pop-up or in notifications.</p>`,
+        "readme_part_7": `<p style="text-align: center;"><strong>Presets</strong></p>
+            <p>iOS 26 look only. A preset is a saved number, so you do not have to type it every time. Set it up on the settings page (hold the number display):</p>
+            <ul>
+            <li><strong>number</strong> — for example 98090111;</li>
+            <li><strong>way</strong>: Toxic (as holding "+"), DDF (as holding "−": turn the phone over or hold 0) or DDF manual (as a tap on the calculator key: touches type the number right away);</li>
+            <li><strong>digit</strong> from 1 to 9 that turns the preset on. One digit cannot belong to two presets.</li>
+            </ul>
+            <p>On the calculator hold that digit for 2 seconds: the screen goes back to 0 and the function is on with the preset number. Numbers 0–9 in DDF work as the date and time in N minutes. Up to three presets.</p>`,
+        "readme_part_8": `<p style="text-align: center;"><strong>(×) Birthday</strong></p>
+            <p>iOS 26 look only.</p>
+            <ol>
+            <li>With 0 on the screen hold "×" for 2 seconds (the clock key lights up).</li>
+            <li>The spectator types the birthday with "+": <strong>DD + MM + YYYY =</strong>, for example 14 + 10 + 1990 = 2014. Go on with the trick using this number.</li>
+            <li>Any time later hold "×" again: instead of the example above the result you see for 3–4 seconds, for example, <strong>Libra · 45 · Sun</strong> — the zodiac sign, days to the birthday (0 means today) and the weekday of birth. Then the example comes back.</li>
+            </ol>
+            <p>The date is kept even if the spectator clears the screen or the history. After it is shown the mode is off. Nothing is saved to the history. If the date is impossible, the calculator waits for the next example.</p>`,
+        "readme_part_9": `<p style="text-align: center;"><strong>(÷) Number memory</strong></p>
+            <p>iOS 26 look only. On the settings page choose which typed number to remember: 1 to 9 (3 by default).</p>
+            <ol>
+            <li>With 0 on the screen hold "÷" for 2 seconds.</li>
+            <li>The calculator counts the numbers typed by hand ("=" results do not count, the operation does not matter, after deleting what is left counts). For example with 3: "type any number — 12345, plus your birth year — 1993, plus the last 4 digits of your phone — 7788, equals". 7788 is remembered, however many steps follow.</li>
+            <li>The spectator may clear the example and the history. Hold "÷" again: 7788 shows instead of 0 for 3–4 seconds, then 0 again. The number is added on top of the history and the mode is off.</li>
+            </ol>
+            <p>If that number has not been typed yet, holding "÷" shows nothing: the mode keeps waiting.</p>`,
         "readme_part_6": `<p style="text-align: center;"><strong>(.)&nbsp;Memory</strong></p>
             <p>This feature is enabled by using the fractional separator symbol, which is between <strong>0</strong> and <strong>=</strong>. All force functions operate continuously when the memory function is enabled. Even if you restart the application. After switching on/off, all forces are reset. Thus, after enabling the memory function, you also need to enable one or another force function at your discretion.</p>`,
         "readme": `<p style="text-align: center;"><strong>Copyright</strong></p>
@@ -108,6 +155,7 @@ const i18n_en = {
             <p style="text-align: justify;"><span style="text-decoration: underline;">Android</span>: permission to display notifications. If enabled, the "peek" function will be displayed in the notification panel. Thus, you can receive notifications on your smart watch. Otherwise, the information will be displayed in a pop-up window.</p>
             <p style="text-align: justify;"><span style="text-decoration: underline;">iOS</span>: permission to access the device orientation for the "DD force" function. Starting with iOS 13, the application is required to request permission every time the application is launched. The permission request will only occur when the "DD force" function is enabled.</p>
             <p style="text-align: center;">Functions</p>
+            <p style="text-align: justify;">In the iOS 26 look holding the number display opens the settings: presets, number memory, calculator look, instructions, LINK for remote control. In the classic look it opens these instructions.</p>
             <p style="text-align: justify;">Any function is activated by holding the corresponding button for 2 seconds. After that, the application will vibrate and the history button (clock) in the top left corner will light up for a moment. Vibration is not available on iOS.</p>
             <ul>
             <ul>
@@ -118,6 +166,9 @@ const i18n_en = {
             <li style="text-align: justify;"><a href="readme.html?part=4"><strong>(-) DD force</strong></a></li>
             <li style="text-align: justify;"><a href="readme.html?part=5"><strong>History</strong></a></li>
             <li style="text-align: justify;"><a href="readme.html?part=6"><strong>(.) Memory</strong></a></li>
+            <li style="text-align: justify;"><a href="readme.html?part=7"><strong>(1–9) Presets</strong></a></li>
+            <li style="text-align: justify;"><a href="readme.html?part=8"><strong>(×) Birthday</strong></a></li>
+            <li style="text-align: justify;"><a href="readme.html?part=9"><strong>(÷) Number memory</strong></a></li>
             </ul>
             </ul>
             <p style="text-align: center;"><strong>Changelog</strong></p>

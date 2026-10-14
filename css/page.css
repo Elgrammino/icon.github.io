@@ -1,0 +1,515 @@
+/* pages next to the calculator: settings and instructions (readme.html, settings.html) */
+@font-face {
+    font-family: 'Unbounded';
+    src: url('../fonts/unbounded-semibold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    src: url('../fonts/manrope-medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    src: url('../fonts/manrope-semibold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    src: url('../fonts/manrope-bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* black, one accent: the calculator orange. Buttons and cards are Liquid Glass.
+   Shape rule: blocks 16px radius, interactive pills fully rounded. */
+:root {
+    --bg: #000000;
+    --surface: #141414;
+    --surface-2: #222222;
+    --line: rgb(255 255 255 / 8%);
+    /* clear glass: light sheen on top, bright rim above, soft rim below */
+    --glass: linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, rgb(255 255 255 / 6%) 55%, rgb(255 255 255 / 9%) 100%);
+    --glass-pressed: linear-gradient(180deg, rgb(255 255 255 / 24%) 0%, rgb(255 255 255 / 12%) 55%, rgb(255 255 255 / 15%) 100%);
+    --glass-rim:
+        inset 0 1px 0.5px rgb(255 255 255 / 45%),
+        inset 0 -1px 0.5px rgb(255 255 255 / 12%),
+        inset 0 0 0 0.5px rgb(255 255 255 / 14%),
+        0 8px 24px rgb(0 0 0 / 50%);
+    /* orange glass for the main actions */
+    --glass-accent: linear-gradient(180deg, rgb(255 184 77 / 95%) 0%, rgb(255 146 0 / 88%) 55%, rgb(230 120 0 / 92%) 100%);
+    --glass-accent-pressed: linear-gradient(180deg, rgb(255 214 120) 0%, rgb(255 183 0) 100%);
+    --glass-accent-rim:
+        inset 0 1px 0.5px rgb(255 255 255 / 65%),
+        inset 0 -1px 1px rgb(120 50 0 / 35%),
+        inset 0 0 0 0.5px rgb(255 255 255 / 25%),
+        0 8px 28px rgb(255 146 0 / 28%);
+    --blur: blur(20px) saturate(180%);
+    --text: #ECEDEE;
+    --muted: #A3A8AE;
+    --accent: #FF9200;
+    --accent-pressed: #FFB700;
+    --accent-ink: #1C1206;
+    --radius: 16px;
+    --display: 'Unbounded', -apple-system, system-ui, sans-serif;
+    --body: 'Manrope', -apple-system, system-ui, sans-serif;
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 16px calc(40px + env(safe-area-inset-bottom));
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    background: rgb(0 0 0 / 72%);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    border-bottom: 1px solid var(--line);
+}
+
+.topbar-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 16px 0 12px;
+    border-radius: 999px;
+    background: var(--glass);
+    box-shadow: var(--glass-rim);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.12s ease-out;
+}
+
+.back::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-left: 4px;
+}
+
+.back:active {
+    transform: scale(0.96);
+    background: var(--glass-pressed);
+}
+
+.version {
+    font-family: var(--display);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+}
+
+/* ---------- header ---------- */
+
+.hero {
+    padding: 28px 0 8px;
+}
+
+.hero h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+}
+
+.hero .copy {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* calculator look switch */
+.setting {
+    margin: 20px 0 0;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+}
+
+.setting h2 {
+    margin: 0 0 12px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 60%), inset 0 0 0 0.5px var(--line);
+}
+
+.segmented button {
+    min-height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out, transform 0.1s ease-out;
+}
+
+.segmented button[aria-checked="true"] {
+    background: var(--glass-accent);
+    color: var(--accent-ink);
+    box-shadow: var(--glass-accent-rim);
+}
+
+.segmented button:active {
+    transform: scale(0.97);
+}
+
+.setting p {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.donate {
+    margin: 20px 0 0;
+}
+
+.donate button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 24px 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--glass-accent);
+    color: var(--accent-ink);
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: var(--glass-accent-rim);
+    transition: transform 0.12s ease-out;
+}
+
+.donate button::before {
+    content: "";
+    width: 18px;
+    height: 16px;
+    background: currentColor;
+    /* heart */
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 21'%3E%3Cpath d='M12 21 10.3 19.5C4.2 14 0 10.2 0 5.6 0 2.4 2.5 0 5.6 0c1.8 0 3.6.8 4.8 2.2L12 4l1.6-1.8C14.8.8 16.6 0 18.4 0 21.5 0 24 2.4 24 5.6c0 4.6-4.2 8.4-10.3 13.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 21'%3E%3Cpath d='M12 21 10.3 19.5C4.2 14 0 10.2 0 5.6 0 2.4 2.5 0 5.6 0c1.8 0 3.6.8 4.8 2.2L12 4l1.6-1.8C14.8.8 16.6 0 18.4 0 21.5 0 24 2.4 24 5.6c0 4.6-4.2 8.4-10.3 13.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.donate button:active {
+    transform: scale(0.97);
+    background: var(--glass-accent-pressed);
+}
+
+.donate small {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ---------- documentation text (comes from the translation files) ---------- */
+
+.doc {
+    padding-top: 8px;
+}
+
+.doc h2 {
+    margin: 36px 0 12px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+}
+
+.doc p,
+.doc li {
+    text-align: left !important;
+}
+
+.doc p {
+    margin: 0 0 14px;
+}
+
+.doc sup {
+    display: block;
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: rgb(255 146 0 / 10%);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    vertical-align: baseline;
+}
+
+.doc strong {
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.doc a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.doc ol,
+.doc ul {
+    margin: 0 0 18px;
+    padding-left: 22px;
+}
+
+.doc li {
+    margin: 0 0 8px;
+}
+
+.doc li::marker {
+    color: var(--muted);
+}
+
+.doc ul ul {
+    margin: 0;
+    padding: 0;
+}
+
+/* functions: one collapsible card each */
+.doc .functions {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 8px;
+}
+
+/* remote control link */
+.doc a#link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    margin: 2px 0;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: var(--glass-accent);
+    box-shadow: var(--glass-accent-rim);
+    color: var(--accent-ink);
+    vertical-align: middle;
+    transition: transform 0.12s ease-out;
+}
+
+.doc a#link:active {
+    transform: scale(0.96);
+    background: var(--glass-accent-pressed);
+}
+
+.doc a#link strong {
+    color: inherit;
+}
+
+/* collapsible cards (functions and changelog) are glass panes */
+.doc details {
+    border-radius: var(--radius);
+    background: var(--glass);
+    box-shadow: var(--glass-rim);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+}
+
+.doc details.changelog {
+    margin: 36px 0 0;
+}
+
+.doc summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    padding: 0 18px;
+    border-radius: var(--radius);
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    list-style: none;
+    transition: background-color 0.12s ease-out;
+}
+
+.doc summary:active {
+    background: rgb(255 255 255 / 6%);
+}
+
+.doc summary::-webkit-details-marker {
+    display: none;
+}
+
+.doc summary::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease-out;
+}
+
+.doc details[open] summary::after {
+    transform: rotate(225deg);
+}
+
+.doc summary::after {
+    flex: none;
+}
+
+.doc .fold-body {
+    padding: 4px 18px 10px;
+}
+
+.doc .fold-body sup {
+    background: rgb(255 146 0 / 12%);
+}
+
+/* smooth open/close where the browser can animate it; elsewhere it just toggles */
+@supports selector(::details-content) {
+    .doc details::details-content {
+        block-size: 0;
+        overflow: clip;
+        transition: block-size 0.25s ease-out, content-visibility 0.25s allow-discrete;
+    }
+
+    .doc details[open]::details-content {
+        block-size: auto;
+    }
+}
+
+:root {
+    interpolate-size: allow-keywords;
+}
+
+.doc .changes h3 {
+    margin: 14px 0 4px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+}
+
+.doc .changes p {
+    color: var(--muted);
+    font-size: 15px;
+}
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 20px);
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgb(40 40 40 / 70%);
+    box-shadow: var(--glass-rim);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* keyboard focus stays visible everywhere */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+a,
+button,
+summary {
+    touch-action: manipulation;
+}
+
+/* function page title */
+.doc h1 {
+    margin: 28px 0 14px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}

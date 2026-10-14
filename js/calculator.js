@@ -2,10 +2,27 @@
 // if (window.location.origin !== "https://michaelstark.github.io") {
 //     window.location.replace("https://michaelstark.github.io/calculator/");
 // }
-// home screen app: 100% height is short by the status bar, use the whole screen
-if (navigator.standalone) {
-    document.documentElement.style.setProperty("--app-height", screen.height + "px");
+// home screen app: 100% height is short by the status bar, use the whole screen.
+// iOS keeps screen.width/height of the portrait screen, so landscape takes the short side
+// (the portrait height in landscape pushed the keys off the screen: a black screen)
+const landscapeQuery = matchMedia("(orientation: landscape)");
+
+function setAppHeight() {
+    if (navigator.standalone) {
+        let sides = [screen.width, screen.height];
+        document.documentElement.style.setProperty("--app-height", (landscapeQuery.matches ? Math.min(...sides) : Math.max(...sides)) + "px");
+    }
 }
+
+setAppHeight();
+landscapeQuery.addEventListener("change", _ => {
+    setAppHeight();
+    // the font size of the number depends on the width: fit it again
+    setTimeout(_ => {
+        displayValue(isDigitsTyping || operation === "" ? inputValue : resultValue.toString());
+        setExpressionLine(expressionEl.innerText);
+    }, 100);
+});
 let swr;
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").then(registration => { // enable PWA, works offline
@@ -300,7 +317,7 @@ function endBtnHandler(e) {
         longPressTarget = null;
         target.classList.remove("pushedOperation");
         if (target === displayEl && !isClientMode()) {
-            window.location.assign("./readme.html");
+            window.location.assign("./settings.html");
         } else {
             magic(target);
         }
@@ -426,6 +443,13 @@ function btnHandler(target) {
             default:
                 if (operation === "" || isDigitsTyping || target.id !== "=" || operation !== "=") {
                     add2MagicHistory(target.id);
+                }
+                // birthday and number memory (magicios26.js) follow the numbers typed by hand
+                if (isDigitsTyping) {
+                    noteTypedNumber(inputValue);
+                }
+                if (target.id === "=") {
+                    noteEquals();
                 }
                 let expressionLine = target.id === "=" ? calculateEquals() : calculateOperation(target.id);
                 let calculatedValue = resultValue;
@@ -762,7 +786,12 @@ const historyPanelEl = historySheetEl.querySelector(".historyPanel");
 const historyListEl = document.getElementById("historyList");
 const historyEditEl = document.getElementById("historyEdit");
 const historyClearEl = document.getElementById("historyClear");
+const historyDoneEl = document.getElementById("historyDone");
+const historyCloseEl = document.getElementById("historyClose");
+const historyConfirmEl = document.getElementById("historyConfirm");
 let historyCloseTimer;
+// editing: rows chosen with the circles (indexes in the saved list)
+let historySelection = new Set();
 
 function loadHistory() {
     try {
@@ -829,18 +858,16 @@ function renderHistory() {
         }
         let row = document.createElement("div");
         row.className = "historyRow";
-        row.innerHTML = '<div class="historyDelete"></div><div class="historyText"><div class="historyExpression"></div><div class="historyResult"></div></div>';
+        row.classList.toggle("selected", historySelection.has(index));
+        row.innerHTML = '<div class="historySelect"></div><div class="historyText"><div class="historyExpression"></div><div class="historyResult"></div></div>';
         row.querySelector(".historyExpression").textContent = entry.e;
         row.querySelector(".historyResult").textContent = formatValue(entry.r);
         // pointerup instead of click (ontouchend cancels clicks on iOS); scrolling the list cancels the pointer
-        row.addEventListener("pointerup", e => {
+        row.addEventListener("pointerup", _ => {
             if (historyListEl.classList.contains("editing")) {
-                if (e.target.classList.contains("historyDelete")) {
-                    let list = loadHistory();
-                    list.splice(index, 1);
-                    saveHistory(list);
-                    renderHistory();
-                }
+                historySelection.has(index) ? historySelection.delete(index) : historySelection.add(index);
+                row.classList.toggle("selected", historySelection.has(index));
+                updateHistoryClear();
             } else {
                 useHistoryEntry(entry);
             }
@@ -864,11 +891,40 @@ function useHistoryEntry(entry) {
     closeHistory();
 }
 
+// iOS 26: editing turns "Edit" into an orange round ✓, the right side shows "Clear All" or "Delete (N)"
 function setHistoryEditing(isEditing) {
+    historySelection.clear();
     historyListEl.classList.toggle("editing", isEditing);
-    historyEditEl.textContent = i18next.t(isEditing ? "historyDone" : "historyEdit");
-    historyClearEl.textContent = i18next.t("historyClear");
+    historyListEl.querySelectorAll(".historyRow.selected").forEach(row => row.classList.remove("selected"));
+    historyEditEl.textContent = i18next.t("historyEdit");
+    historyEditEl.classList.toggle("hidden", isEditing);
+    historyDoneEl.classList.toggle("hidden", !isEditing);
     historyClearEl.classList.toggle("hidden", !isEditing);
+    historyCloseEl.classList.toggle("hidden", isEditing);
+    updateHistoryClear();
+}
+
+function updateHistoryClear() {
+    historyClearEl.textContent = historySelection.size
+        ? i18next.t("historyDelete", { count: historySelection.size })
+        : i18next.t("historyClearAll");
+}
+
+// "Clear All": a card next to the button, as in iOS; a tap outside it cancels
+function showHistoryConfirm() {
+    document.getElementById("historyConfirmText").textContent = i18next.t("historyClearAsk");
+    document.getElementById("historyConfirmClear").textContent = i18next.t("historyClearConfirm");
+    let rect = historyClearEl.getBoundingClientRect();
+    let card = historyConfirmEl.firstElementChild;
+    historyConfirmEl.classList.remove("hidden", "show");
+    card.style.right = Math.max(window.innerWidth - rect.right - rect.height * 0.4, 8) + "px";
+    card.style.top = Math.max(rect.top + rect.height / 2 - card.offsetHeight / 2, 8) + "px";
+    requestAnimationFrame(_ => requestAnimationFrame(_ => historyConfirmEl.classList.add("show")));
+}
+
+function hideHistoryConfirm() {
+    historyConfirmEl.classList.remove("show");
+    setTimeout(_ => historyConfirmEl.classList.contains("show") || historyConfirmEl.classList.add("hidden"), 200);
 }
 
 function openHistory() {
@@ -882,20 +938,34 @@ function openHistory() {
 }
 
 function closeHistory() {
+    hideHistoryConfirm();
     historySheetEl.className = historySheetEl.classList.contains("large") ? "large closed" : "closed";
     historyCloseTimer = setTimeout(_ => historySheetEl.className = "hidden closed", 450);
 }
 
 historySheetEl.querySelector(".historyBackdrop").addEventListener("pointerup", closeHistory);
 document.getElementById("historyClose").addEventListener("pointerup", closeHistory);
-historyEditEl.addEventListener("pointerup", _ => setHistoryEditing(!historyListEl.classList.contains("editing")));
+historyEditEl.addEventListener("pointerup", _ => setHistoryEditing(true));
+historyDoneEl.addEventListener("pointerup", _ => setHistoryEditing(false));
 historyClearEl.addEventListener("pointerup", _ => {
-    showMessage(i18next.t("historyClearAsk"), [i18next.t("cancel"), i18next.t("historyClear")]).then(choice => {
-        if (choice === 1) {
-            saveHistory([]);
-            renderHistory();
-        }
-    });
+    if (historySelection.size) {
+        saveHistory(loadHistory().filter((_, index) => !historySelection.has(index)));
+        historySelection.clear();
+        updateHistoryClear();
+        renderHistory();
+    } else {
+        showHistoryConfirm();
+    }
+});
+historyConfirmEl.addEventListener("pointerup", e => {
+    if (e.target.id === "historyConfirmClear") {
+        saveHistory([]);
+        setHistoryEditing(false);
+        renderHistory();
+    }
+    if (!e.target.closest(".historyConfirmCard") || e.target.id === "historyConfirmClear") {
+        hideHistoryConfirm();
+    }
 });
 
 // pulling the grabber: up to the whole screen, down to half height or away

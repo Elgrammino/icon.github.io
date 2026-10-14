@@ -171,10 +171,27 @@ function magic(target) {
             toggleRC();
             break;
         case "%":
-            // numerology
-            let remainder = getVisibleValue().match(/\d/g).reduce((a, b) => a + Number(b), 0) % 9;
-            target.innerHTML = "<sup>" + (remainder || 9) + "</sup>⁄<sub>" + (9 - remainder) + "</sub>";
+            // numerology: top is the plain sum of the digits (12345678 → 45), bottom is 9 − (sum mod 9)
+            let digitSum = getVisibleValue().match(/\d/g).reduce((a, b) => a + Number(b), 0);
+            target.innerHTML = "<sup>" + digitSum + "</sup>⁄<sub>" + (9 - digitSum % 9) + "</sub>";
             setTimeout(_ => target.innerText = "%", 1000);
+            break;
+        case "x":
+            applyBirthday();
+            break;
+        case "÷":
+            applyNumberMemory();
+            break;
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+            applyPreset(target.id);
             break;
         case "0":
             // display down force manually
@@ -310,11 +327,11 @@ function applyPostMagic(targetId) {
 // one tap on the calculator key with a typed number = hold "−" and then hold "0":
 // the number becomes the DD force, the screen goes back to 0 and the next touches type it digit by digit.
 // Set up directly instead of applyDDForce(): its "no orientation access" pop-up is not needed in manual mode
-function armDDFManual() {
-    if (isClientMode() || !isDigitsTyping) {
+function armDDFManual(value) {
+    if (isClientMode() || value === undefined && !isDigitsTyping) {
         return;
     }
-    let value = getVisibleValue();
+    value = value ?? getVisibleValue();
     disableMagic();
     if (isRCEnabled()) {
         sendRCData({ type: "-", payload: value });
@@ -354,4 +371,187 @@ function setMagicDDFResult(value) {
     if (isMagicMemoryEnabled) {
         localStorage.setItem("magicDDFResult", value);
     }
+}
+
+// ---------- presets (settings page): a saved number on a digit key ----------
+// holding the digit does what holding "+" (toxic), "−" (DDF) or a tap on the calculator key (DDF manual) does
+// with a typed number, so the number does not have to be typed every time
+function loadPresets() {
+    try {
+        let presets = JSON.parse(localStorage.getItem("presets"));
+        return Array.isArray(presets) ? presets : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function applyPreset(key) {
+    let preset = loadPresets().find(p => p.key === key && /^\d+$/.test(p.value || ""));
+    if (!preset) {
+        return;
+    }
+    switch (preset.mode) {
+        case "toxic":
+            disableMagic();
+            if (isRCEnabled()) {
+                sendRCData({ type: "+", payload: preset.value });
+            } else {
+                applyToxic(preset.value);
+            }
+            reset();
+            break;
+        case "ddf":
+            disableMagic();
+            if (isRCEnabled()) {
+                sendRCData({ type: "-", payload: preset.value });
+            } else {
+                applyDDForce(preset.value);
+            }
+            reset();
+            break;
+        case "ddfManual":
+            armDDFManual(preset.value);
+            break;
+    }
+}
+
+// ---------- numbers typed by hand: birthday (hold ×) and number memory (hold ÷) ----------
+// both are armed on a 0 screen, follow the numbers typed after that and survive a reload and a cleared history
+
+function loadMagicState(key) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function saveMagicState(key, state) {
+    try {
+        state ? localStorage.setItem(key, JSON.stringify(state)) : localStorage.removeItem(key);
+    } catch (e) { }
+}
+
+function isZeroScreen() {
+    return !isOperationPending() && displayEl.innerText === formatValue("0");
+}
+
+// calculator.js: a typed number is finished (an operation or "=" follows it)
+function noteTypedNumber(value) {
+    let memory = loadMagicState("magicNumberMemory");
+    if (memory && memory.value === undefined) {
+        memory.count++;
+        if (memory.count === getNumberMemoryIndex()) {
+            memory.value = value;
+        }
+        saveMagicState("magicNumberMemory", memory);
+    }
+    let birthday = loadMagicState("magicBirthday");
+    if (birthday && !birthday.date) {
+        birthday.numbers.push(value);
+        saveMagicState("magicBirthday", birthday);
+    }
+}
+
+// calculator.js: "=" pressed; the first three numbers of the example are DD + MM + YYYY
+function noteEquals() {
+    let birthday = loadMagicState("magicBirthday");
+    if (birthday && !birthday.date) {
+        let [day, month, year] = birthday.numbers.map(Number);
+        if (birthday.numbers.length >= 3 && isValidDate(day, month, year)) {
+            birthday.date = [day, month, year];
+        }
+        birthday.numbers = [];
+        saveMagicState("magicBirthday", birthday);
+    }
+}
+
+function isValidDate(day, month, year) {
+    return [day, month, year].every(Number.isInteger) && year >= 1900 && year <= new Date().getFullYear()
+        && month >= 1 && month <= 12 && day >= 1 && day <= new Date(year, month, 0).getDate();
+}
+
+// on a 0 screen: arm; once the date is typed: show "Libra · 45 · Sun" instead of the example for 3.5 s and switch off
+function applyBirthday() {
+    let birthday = loadMagicState("magicBirthday");
+    if (!birthday) {
+        if (isZeroScreen()) {
+            saveMagicState("magicBirthday", { numbers: [] });
+        }
+    } else if (birthday.date) {
+        saveMagicState("magicBirthday", null);
+        peekText(expressionEl, getBirthdayInfo(...birthday.date));
+    }
+}
+
+function getBirthdayInfo(day, month, year) {
+    // tropical zodiac: the sign starts on this day of the month (Capricorn from Dec 22 again)
+    const starts = [20, 19, 21, 20, 21, 21, 23, 23, 23, 23, 22, 22];
+    let sign = day >= starts[month - 1] ? month : month - 1;
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Feb 29 in a common year falls on Mar 1
+    let next = new Date(today.getFullYear(), month - 1, day);
+    if (next < today) {
+        next = new Date(today.getFullYear() + 1, month - 1, day);
+    }
+    let days = Math.round((next - today) / 86400000);
+    let weekday = new Date(year, month - 1, day).toLocaleDateString(i18next.language, { weekday: "short" }).replace(".", "");
+    weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+    return i18next.t("zodiac", { returnObjects: true })[sign % 12] + " · " + days + " · " + weekday;
+}
+
+function getNumberMemoryIndex() {
+    let index = Number(localStorage.getItem("numberMemoryIndex"));
+    return index >= 1 && index <= 9 ? index : 3;
+}
+
+// on a 0 screen: arm; once the N-th typed number is known: show it instead of 0 for 3.5 s,
+// add it to the history and switch off. Earlier holds do nothing, it keeps waiting
+function applyNumberMemory() {
+    let memory = loadMagicState("magicNumberMemory");
+    if (!memory) {
+        if (isZeroScreen()) {
+            saveMagicState("magicNumberMemory", { count: 0 });
+        }
+        return;
+    }
+    let value = memory.value;
+    // the N-th number is still being typed
+    if (value === undefined && isDigitsTyping && memory.count + 1 === getNumberMemoryIndex()) {
+        value = inputValue;
+    }
+    if (value !== undefined) {
+        saveMagicState("magicNumberMemory", null);
+        let entries = loadHistory();
+        entries.unshift({ t: Date.now(), e: "", r: value });
+        saveHistory(entries);
+        peekText(displayEl, formatValue(value), "displayS1");
+        for (let size = 2; size <= 12 && displayEl.scrollWidth > displayEl.clientWidth; size++) {
+            displayEl.className = "displayS" + size;
+        }
+    }
+}
+
+// shows text in place for 3.5 s, then puts back what was there unless a key changed it meanwhile
+let peeks = new Map();
+
+function peekText(el, text, className) {
+    let peek = peeks.get(el);
+    if (peek) {
+        clearTimeout(peek.timer);
+    } else {
+        peek = { text: el.innerText, className: el.className };
+        peeks.set(el, peek);
+    }
+    el.innerText = text;
+    el.className = className || "";
+    let shown = el.innerText;
+    peek.timer = setTimeout(_ => {
+        peeks.delete(el);
+        if (el.innerText === shown) {
+            el.innerText = peek.text;
+            el.className = peek.className;
+        }
+    }, 3500);
 }

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Calculator App</title>
+    <link rel="stylesheet" href="./css/page.css">
+    <style>
+        /* settings: same look as the instructions, every block is a .setting card */
+        .settings h1 {
+            margin: 28px 0 0;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 30px;
+            line-height: 1.15;
+        }
+
+        .setting h2 small {
+            margin-left: 6px;
+            color: var(--muted);
+            font-family: var(--body);
+            font-weight: 700;
+        }
+
+        .setting>p:first-of-type {
+            margin-top: -4px;
+        }
+
+        .presets {
+            display: grid;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .preset {
+            display: grid;
+            gap: 10px;
+            padding: 12px;
+            border-radius: var(--radius);
+            background: var(--bg);
+            box-shadow: inset 0 0 0 0.5px var(--line);
+        }
+
+        .preset-top {
+            display: flex;
+            gap: 8px;
+        }
+
+        .field {
+            flex: 1;
+            min-width: 0;
+            min-height: 44px;
+            padding: 0 14px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--surface-2);
+            box-shadow: inset 0 0 0 0.5px var(--line);
+            color: var(--text);
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: 16px;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .field::placeholder {
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .field:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+        }
+
+        .field.number {
+            font-family: var(--display);
+            font-size: 18px;
+            letter-spacing: 0.04em;
+        }
+
+        .remove {
+            flex: none;
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 50%;
+            background: var(--glass);
+            box-shadow: var(--glass-rim);
+            color: var(--muted);
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .remove:active {
+            background: var(--glass-pressed);
+        }
+
+        .segmented.three {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .segmented.three button {
+            font-size: 14px;
+        }
+
+        .label {
+            margin: 2px 0 -4px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* digit keys: 44px targets, one per free digit */
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+            gap: 6px;
+        }
+
+        .keys button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--surface-2);
+            box-shadow: inset 0 0 0 0.5px var(--line);
+            color: var(--text);
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.1s ease-out;
+        }
+
+        .keys button[aria-checked="true"] {
+            background: var(--glass-accent);
+            box-shadow: var(--glass-accent-rim);
+            color: var(--accent-ink);
+        }
+
+        .keys button:active {
+            transform: scale(0.95);
+        }
+
+        .glass-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 0 20px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--glass);
+            box-shadow: var(--glass-rim);
+            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur);
+            color: var(--text);
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.12s ease-out;
+        }
+
+        .glass-button:active {
+            transform: scale(0.97);
+            background: var(--glass-pressed);
+        }
+
+        .glass-button:disabled {
+            opacity: 0.4;
+        }
+
+        #memoryIndex {
+            margin-top: 14px;
+        }
+
+        .add {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .actions .glass-button {
+            flex: 1 1 140px;
+        }
+
+        .instructions::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid currentColor;
+            border-top: 2px solid currentColor;
+            transform: rotate(45deg);
+        }
+    </style>
+    <script src="./js/version.js"></script>
+    <script src="./js/i18n/i18n_en.js"></script>
+    <script src="./js/i18n/i18n_ru.js"></script>
+    <script src="./js/i18n/i18n.js"></script>
+    <script src="./js/i18n/i18nextBrowserLanguageDetector.min.js"></script>
+    <script src="./js/i18n/i18next.js"></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="back" id="back" href="./"></a>
+            <span class="version" id="version"></span>
+        </div>
+    </header>
+    <main class="page settings">
+        <h1 id="title"></h1>
+
+        <section class="setting">
+            <h2 id="presetsTitle"></h2>
+            <p id="presetsHint"></p>
+            <div class="presets" id="presets"></div>
+            <button type="button" class="glass-button add" id="addPreset"></button>
+        </section>
+
+        <section class="setting">
+            <h2><span id="memoryTitle"></span><small>÷</small></h2>
+            <p id="memoryHint"></p>
+            <div class="keys" id="memoryIndex" role="radiogroup" aria-labelledby="memoryTitle"></div>
+        </section>
+
+        <section class="setting">
+            <h2><span id="birthdayTitle"></span><small>×</small></h2>
+            <p id="birthdayHint"></p>
+        </section>
+
+        <section class="setting">
+            <h2 id="uiTitle"></h2>
+            <div class="segmented" id="ui" role="radiogroup" aria-labelledby="uiTitle">
+                <button type="button" role="radio" data-ui="new" aria-checked="false"></button>
+                <button type="button" role="radio" data-ui="classic" aria-checked="false"></button>
+            </div>
+            <p id="uiHint"></p>
+        </section>
+
+        <div class="actions">
+            <a class="glass-button instructions" id="instructions" href="./readme.html"></a>
+            <button type="button" class="glass-button" id="link">LINK</button>
+        </div>
+
+        <form class="donate" action="https://www.paypal.com/donate" method="post" target="_top">
+            <input type="hidden" name="hosted_button_id" value="QJGGN9PQFPFN6" />
+            <button type="submit" id="donate"></button>
+            <small>PayPal</small>
+        </form>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+    <script>
+        const presetsMax = 3;
+        const presetModes = ["toxic", "ddf", "ddfManual"];
+        const t = key => i18next.t(key);
+
+        document.getElementById("version").textContent = "v" + version;
+        i18next.use(i18nextBrowserLanguageDetector).init(i18n).then(_ => {
+            document.documentElement.lang = i18next.language;
+            const texts = {
+                back: "backToCalculator", title: "settings", presetsTitle: "presets", presetsHint: "presetsHint",
+                addPreset: "presetAdd", memoryTitle: "numberMemory", birthdayTitle: "birthday", birthdayHint: "birthdayHint",
+                instructions: "instructions", donate: "donate"
+            };
+            Object.entries(texts).forEach(([id, key]) => document.getElementById(id).textContent = t(key));
+            setupPresets();
+            setupMemoryIndex();
+            setupInterfaceSwitch();
+            setupLink();
+        });
+
+        function read(key, fallback) {
+            try {
+                return JSON.parse(localStorage.getItem(key)) ?? fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function write(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) { }
+        }
+
+        // ---------- presets: number + way (toxic / DDF / DDF manual) + digit key, read by magicios26.js ----------
+
+        function loadPresets() {
+            let presets = read("presets", []);
+            return Array.isArray(presets) ? presets.slice(0, presetsMax) : [];
+        }
+
+        function savePresets(presets, isRenderNeeded) {
+            write("presets", presets);
+            if (isRenderNeeded) {
+                renderPresets();
+            }
+            showToast("✓ " + t("savedShort"));
+        }
+
+        function freeKeys(presets, own) {
+            let taken = presets.map(p => p.key);
+            return ["1", "2", "3", "4", "5", "6", "7", "8", "9"].filter(key => key === own || !taken.includes(key));
+        }
+
+        function setupPresets() {
+            document.getElementById("addPreset").addEventListener("click", _ => {
+                let presets = loadPresets();
+                if (presets.length < presetsMax) {
+                    presets.push({ name: "", value: "", mode: "ddf", key: freeKeys(presets)[0] });
+                    savePresets(presets, true);
+                    document.querySelector(".preset:last-child .number").focus();
+                }
+            });
+            renderPresets();
+        }
+
+        function renderPresets() {
+            let presets = loadPresets();
+            let list = document.getElementById("presets");
+            list.textContent = "";
+            presets.forEach((preset, index) => {
+                let card = document.createElement("div");
+                card.className = "preset";
+                card.innerHTML = `
+                    <div class="preset-top">
+                        <input class="field name" type="text" maxlength="24" autocomplete="off">
+                        <button type="button" class="remove" aria-label="">×</button>
+                    </div>
+                    <input class="field number" type="text" inputmode="numeric" maxlength="13" autocomplete="off">
+                    <div class="segmented three" role="radiogroup"></div>
+                    <div class="label"></div>
+                    <div class="keys" role="radiogroup"></div>`;
+                let name = card.querySelector(".name");
+                name.placeholder = t("presetName") + " " + (index + 1);
+                name.value = preset.name || "";
+                // saved while typing: leaving the page right away does not lose it
+                name.addEventListener("input", _ => {
+                    presets[index].name = name.value.trim();
+                    write("presets", presets);
+                });
+                name.addEventListener("change", _ => showToast("✓ " + t("savedShort")));
+                let remove = card.querySelector(".remove");
+                remove.setAttribute("aria-label", t("presetRemove"));
+                remove.addEventListener("click", _ => {
+                    presets.splice(index, 1);
+                    savePresets(presets, true);
+                });
+                let number = card.querySelector(".number");
+                number.placeholder = t("presetNumber");
+                number.value = preset.value || "";
+                number.addEventListener("input", _ => {
+                    number.value = number.value.replace(/\D/g, "");
+                    presets[index].value = number.value;
+                    write("presets", presets);
+                });
+                number.addEventListener("change", _ => showToast("✓ " + t("savedShort")));
+                let modes = card.querySelector(".segmented");
+                presetModes.forEach(mode => {
+                    let button = document.createElement("button");
+                    button.type = "button";
+                    button.setAttribute("role", "radio");
+                    button.setAttribute("aria-checked", preset.mode === mode);
+                    button.textContent = t("presetMode_" + mode);
+                    button.addEventListener("click", _ => {
+                        presets[index].mode = mode;
+                        savePresets(presets, true);
+                    });
+                    modes.append(button);
+                });
+                card.querySelector(".label").textContent = t("presetKey");
+                let keys = card.querySelector(".keys");
+                freeKeys(presets, preset.key).forEach(key => {
+                    let button = document.createElement("button");
+                    button.type = "button";
+                    button.setAttribute("role", "radio");
+                    button.setAttribute("aria-checked", preset.key === key);
+                    button.textContent = key;
+                    button.addEventListener("click", _ => {
+                        presets[index].key = key;
+                        savePresets(presets, true);
+                    });
+                    keys.append(button);
+                });
+                list.append(card);
+            });
+            document.getElementById("addPreset").hidden = presets.length >= presetsMax;
+        }
+
+        // ---------- number memory: which typed number (1–9) the calculator remembers ----------
+
+        function setupMemoryIndex() {
+            let current = Number(localStorage.getItem("numberMemoryIndex")) || 3;
+            let box = document.getElementById("memoryIndex");
+            let render = _ => {
+                box.querySelectorAll("button").forEach(b => b.setAttribute("aria-checked", Number(b.textContent) === current));
+                document.getElementById("memoryHint").textContent = t("numberMemoryHint").replace("{{n}}", current);
+            };
+            for (let n = 1; n <= 9; n++) {
+                let button = document.createElement("button");
+                button.type = "button";
+                button.setAttribute("role", "radio");
+                button.textContent = n;
+                button.addEventListener("click", _ => {
+                    current = n;
+                    try { localStorage.setItem("numberMemoryIndex", n); } catch (e) { }
+                    render();
+                    showToast("✓ " + t("savedShort"));
+                });
+                box.append(button);
+            }
+            render();
+        }
+
+        // ---------- calculator look ----------
+
+        function setupInterfaceSwitch() {
+            document.getElementById("uiTitle").textContent = t("interface");
+            document.getElementById("uiHint").textContent = t("interfaceHint");
+            const buttons = document.querySelectorAll("#ui button");
+            const render = _ => {
+                let current = "new";
+                try { current = localStorage.getItem("ui") === "classic" ? "classic" : "new"; } catch (e) { }
+                buttons.forEach(b => b.setAttribute("aria-checked", b.dataset.ui === current));
+            };
+            buttons.forEach(button => {
+                button.textContent = t(button.dataset.ui === "classic" ? "interfaceClassic" : "interfaceNew");
+                button.addEventListener("click", _ => {
+                    try {
+                        button.dataset.ui === "classic" ? localStorage.setItem("ui", "classic") : localStorage.removeItem("ui");
+                    } catch (e) { }
+                    render();
+                    showToast("✓ " + t("saved"));
+                });
+            });
+            render();
+        }
+
+        // ---------- remote control link for the viewer's phone ----------
+
+        function setupLink() {
+            let button = document.getElementById("link");
+            let peerId = localStorage.getItem("currentPeerId");
+            button.title = t("copyLinkHint");
+            button.addEventListener("click", _ => {
+                if (!peerId) {
+                    showToast(t("linkNoId"));
+                    return;
+                }
+                let href = new URL("./?hostPeerId=" + peerId, window.location.href).href;
+                navigator.clipboard.writeText(href)
+                    .then(_ => showToast("✓ " + href.replace(/^https?:\/\//, "").slice(0, 42) + "…"));
+            });
+        }
+
+        let toastTimer;
+        function showToast(text) {
+            const toast = document.getElementById("toast");
+            toast.textContent = text;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(_ => toast.classList.remove("show"), 1800);
+        }
+    </script>
+</body>
+
+</html>

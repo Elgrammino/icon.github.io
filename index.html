@@ -108,13 +108,22 @@
                 <div class="historyGrabber"></div>
                 <div class="historyBar">
                     <button type="button" class="historyPill" id="historyEdit"></button>
-                    <button type="button" class="historyPill hidden" id="historyClear"></button>
+                    <button type="button" class="historyRound historyDone hidden" id="historyDone" aria-label="Done">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg>
+                    </button>
+                    <button type="button" class="historyPill historyDanger hidden" id="historyClear"></button>
                     <button type="button" class="historyRound" id="historyClose" aria-label="Close">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
                     </button>
                 </div>
             </div>
             <div class="historyList" id="historyList"></div>
+        </div>
+        <div class="historyConfirm hidden" id="historyConfirm">
+            <div class="historyConfirmCard" role="alertdialog" aria-modal="true">
+                <p id="historyConfirmText"></p>
+                <button type="button" id="historyConfirmClear"></button>
+            </div>
         </div>
     </div>
 </body>
