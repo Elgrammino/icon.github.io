@@ -162,7 +162,8 @@ function magic(target) {
     }
     switch (target.id) {
         case "c":
-            // reload
+            // reload; this is also the only way out of the birthday trick (it survives a reload otherwise)
+            saveMagicState("magicBirthday", null);
             loadingEl.classList.remove("hidden");
             document.location.reload();
             break;
@@ -486,8 +487,8 @@ function isValidDate(day, month, year) {
 }
 
 // on a 0 screen: arm; once the date is typed: show "Libra · 45 · Sun" instead of the example and the sum under "="
-// (2014) instead of the number, both for 3.5 s. Without a reveal photo it switches off; with one it stays on
-// (the peek can be repeated) until the photo thumbnail is closed
+// (2014) instead of the number, both for 3.5 s. The peek and the photo can be repeated as often as needed:
+// the trick only switches off with a hold of AC (the spectator's own AC does not touch it)
 function applyBirthday() {
     let birthday = loadMagicState("magicBirthday");
     if (!birthday) {
@@ -495,9 +496,6 @@ function applyBirthday() {
             saveMagicState("magicBirthday", { numbers: [] });
         }
     } else if (birthday.date) {
-        if (!reveal.hasPhoto()) {
-            saveMagicState("magicBirthday", null);
-        }
         peekText(expressionEl, getBirthdayInfo(...birthday.date));
         if (birthday.sum !== undefined) {
             peekText(displayEl, formatValue(birthday.sum), "displayS1");
@@ -530,7 +528,7 @@ function modeKeyTap() {
 }
 
 // a thumbnail in the bottom-left corner like after a screenshot: long-press it → "Add to Photos".
-// A tap anywhere else (or 15 s) closes it and ends the birthday trick
+// A swipe on it (left or down), a tap anywhere else or 15 s close it; the birthday trick stays on
 let revealShotEl = null;
 
 function showRevealShot(blob) {
@@ -550,13 +548,14 @@ function showRevealShot(blob) {
     revealShotEl = shot;
     requestAnimationFrame(_ => requestAnimationFrame(_ => shot.classList.add("show")));
     let timer;
-    let close = _ => {
+    let close = isSwiped => {
         clearTimeout(timer);
         if (revealShotEl !== shot) {
             return;
         }
         revealShotEl = null;
-        saveMagicState("magicBirthday", null);
+        shot.classList.toggle("swiped", isSwiped === true);
+        shot.style.transform = "";
         shot.classList.remove("show");
         catcher.remove();
         setTimeout(_ => {
@@ -573,7 +572,36 @@ function showRevealShot(blob) {
         clearTimeout(timer);
         timer = setTimeout(close, 15000);
     };
-    shot.addEventListener("pointerdown", restart);
+    // swipe: the thumbnail follows the finger; far enough left or down and it flies away, otherwise it comes back
+    let start = null;
+    shot.addEventListener("pointerdown", e => {
+        restart();
+        start = { x: e.clientX, y: e.clientY };
+        shot.style.transition = "none";
+        // the finger may leave the thumbnail while swiping: keep getting its moves and the release
+        shot.setPointerCapture(e.pointerId);
+    });
+    shot.addEventListener("pointermove", e => {
+        if (start) {
+            let dx = Math.min(0, e.clientX - start.x), dy = Math.max(0, e.clientY - start.y);
+            shot.style.transform = "translate(" + dx + "px, " + dy + "px)";
+        }
+    });
+    let release = e => {
+        if (!start) {
+            return;
+        }
+        let dx = e.clientX - start.x, dy = e.clientY - start.y;
+        start = null;
+        shot.style.transition = "";
+        if (e.type === "pointerup" && (dx < -40 || dy > 40)) {
+            close(true);
+        } else {
+            shot.style.transform = "";
+        }
+    };
+    shot.addEventListener("pointerup", release);
+    shot.addEventListener("pointercancel", release);
     restart();
 }
 

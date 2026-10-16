@@ -383,8 +383,9 @@
             border-radius: 12px;
             background: #F4F1EA;
             color: #18181A;
-            font-family: "Times New Roman", Times, Georgia, serif;
-            font-size: 15px;
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: 14px;
         }
 
         .sub-label {
@@ -471,6 +472,16 @@
             color: var(--muted);
             font-size: 13px;
             font-weight: 600;
+        }
+
+        .editor-tools label {
+            display: grid;
+            gap: 2px;
+        }
+
+        .editor-tools .segmented button {
+            min-height: 36px;
+            font-size: 13.5px;
         }
 
         .editor-tools input {
@@ -622,7 +633,14 @@
             <canvas class="photo" id="editorCanvas"></canvas>
             <canvas class="loupe" id="editorLoupe" width="240" height="240" hidden></canvas>
         </div>
-        <label class="editor-tools"><span id="editorFontLabel"></span><input type="range" id="editorFont" min="0.4" max="1.6" step="0.05" value="1"></label>
+        <div class="editor-tools">
+            <div class="segmented" id="editorFontFace" role="radiogroup">
+                <button type="button" role="radio" data-font="unbounded" aria-checked="true">Unbounded</button>
+                <button type="button" role="radio" data-font="times" aria-checked="false">Times</button>
+            </div>
+            <label><span id="editorFontLabel"></span><input type="range" id="editorFont" min="0.4" max="1.6" step="0.05" value="1"></label>
+            <label><span id="editorOpacityLabel"></span><input type="range" id="editorOpacity" min="0.2" max="1" step="0.05" value="0.9"></label>
+        </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
     <script>
@@ -867,7 +885,7 @@
             const ids = {
                 revealCorners: "revealCorners", revealRemove: "revealRemove", revealHoursLabel: "revealHours",
                 revealTextLabel: "revealText", revealExampleLabel: "revealExample", revealNoPhoto: "revealNoPhoto",
-                editorCancel: "revealCancel", editorDone: "revealDone", editorHint: "revealCornersHint", editorFontLabel: "revealFontSize"
+                editorCancel: "revealCancel", editorDone: "revealDone", editorHint: "revealCornersHint", editorFontLabel: "revealFontSize", editorOpacityLabel: "revealOpacity"
             };
             Object.entries(ids).forEach(([id, key]) => document.getElementById(id).textContent = t(key));
 
@@ -954,7 +972,7 @@
             if (!meta) {
                 return;
             }
-            reveal.loadPhoto().then(stored => reveal.decode(stored.blob)).then(image => {
+            Promise.all([reveal.loadPhoto().then(stored => reveal.decode(stored.blob)), reveal.loadFonts()]).then(([image]) => {
                 let editor = document.getElementById("editor");
                 let stage = document.getElementById("editorStage");
                 let canvas = document.getElementById("editorCanvas");
@@ -962,7 +980,14 @@
                 let font = document.getElementById("editorFont");
                 editor.hidden = false;
                 let corners = meta.corners.map(c => c.slice());
-                font.value = meta.fontScale || 1;
+                let opacity = document.getElementById("editorOpacity");
+                let faces = document.querySelectorAll("#editorFontFace button");
+                let style = reveal.getStyle(meta);
+                font.value = style.fontScale;
+                opacity.value = style.opacity;
+                let face = style.font;
+                let renderFaces = _ => faces.forEach(b => b.setAttribute("aria-checked", b.dataset.font === face));
+                renderFaces();
                 let box = stage.getBoundingClientRect();
                 let scale = Math.min((box.width - 24) / image.width, (box.height - 24) / image.height);
                 let cssW = Math.round(image.width * scale), cssH = Math.round(image.height * scale);
@@ -977,7 +1002,8 @@
                 let draw = _ => {
                     frame = 0;
                     g.drawImage(image, 0, 0, canvas.width, canvas.height);
-                    reveal.drawOnSheet(g, text, reveal.orderCorners(corners).map(([x, y]) => [x * canvas.width, y * canvas.height]), Number(font.value));
+                    reveal.drawOnSheet(g, text, reveal.orderCorners(corners).map(([x, y]) => [x * canvas.width, y * canvas.height]),
+                        { fontScale: Number(font.value), opacity: Number(opacity.value), font: face });
                 };
                 let redraw = _ => frame = frame || requestAnimationFrame(draw);
                 draw();
@@ -1051,9 +1077,15 @@
                     handle.addEventListener("pointercancel", drop);
                 });
                 font.oninput = redraw;
+                opacity.oninput = redraw;
+                faces.forEach(b => b.onclick = _ => {
+                    face = b.dataset.font;
+                    renderFaces();
+                    redraw();
+                });
                 let close = isSave => {
                     if (isSave) {
-                        reveal.setMeta(Object.assign(reveal.getMeta(), { corners, fontScale: Number(font.value) }));
+                        reveal.setMeta(Object.assign(reveal.getMeta(), { corners, fontScale: Number(font.value), opacity: Number(opacity.value), font: face }));
                         showToast("✓ " + t("savedShort"));
                     }
                     editor.hidden = true;

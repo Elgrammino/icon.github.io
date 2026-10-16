@@ -53,6 +53,7 @@ const i18n_en = {
         "revealText": "Text on the sheet",
         "revealExample": "Example",
         "revealFontSize": "Text size",
+        "revealOpacity": "Text opacity",
         "revealCornersHint": "Drag the dots onto the corners of the sheet",
         "revealDone": "Done",
         "revealCancel": "Cancel",
@@ -151,9 +152,10 @@ const i18n_en = {
             <ol>
             <li>With 0 on the screen hold "×" for 1 second (the clock key lights up).</li>
             <li>The spectator types the birthday with "+": <strong>DD + MM + YYYY =</strong>, for example 14 + 10 + 1990 = 2014. Go on with the trick using this number.</li>
-            <li>Any time later hold "×" again: instead of the example above the result you see for 3–4 seconds, for example, <strong>Libra · 45 · Sun</strong> — the zodiac sign, days to the birthday (0 means today) and the weekday of birth. Then the example comes back.</li>
+            <li>Any time later hold "×" again: instead of the example above the result you see for 3–4 seconds, for example, <strong>Libra · 45 · Sun</strong> — the zodiac sign, days to the birthday (0 means today) and the weekday of birth. Below it, instead of the number, the result the spectator got after "=" (2014). Then everything comes back.</li>
+            <li>Photo reveal (if a photo is added in the settings): after "=" tap the calculator key — a thumbnail shows in the bottom-left corner, like after a screenshot. Long-press it and choose Add to Photos: the gallery gets your photo with the sheet where the text about the spectator is "printed in advance", taken N hours ago. A swipe left or down, a tap anywhere on the calculator or 15 seconds remove the thumbnail.</li>
             </ol>
-            <p>The date is kept even if the spectator clears the screen or the history. After it is shown the mode is off. Nothing is saved to the history. If the date is impossible, the calculator waits for the next example.</p>`,
+            <p>While the mode is on, the calculator key works for the photo, not for DDF. The peek and the photo can be repeated as often as needed. The mode switches off only with a hold of AC — a normal AC (the spectator clearing the example) does not touch it. The date is kept even if the spectator clears the screen or the history. Nothing is saved to the history. If the date is impossible, the calculator waits for the next example.</p>`,
         "readme_part_9": `<p style="text-align: center;"><strong>(÷) Number memory</strong></p>
             <p>iOS 26 look only. On the settings page choose which typed number to remember: 1 to 9 (3 by default).</p>
             <ol>

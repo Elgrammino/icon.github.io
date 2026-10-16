@@ -4,12 +4,36 @@
 // Used by settings.html (photo, corners, text, hours) and index.html (thumbnail to long-press → Add to Photos).
 //
 // Storage: the photo (upright JPEG bytes) in IndexedDB "reveal"/"photo"/"main", together with the original EXIF (TIFF bytes);
-// localStorage "revealPhoto" {width, height, corners: [[x, y] × 4] in 0..1, fontScale}, "revealTemplate", "revealHours".
+// localStorage "revealPhoto" {width, height, corners: [[x, y] × 4] in 0..1, fontScale, opacity, font: "unbounded" | "times"},
+// "revealTemplate", "revealHours".
 
 const reveal = (_ => {
     const maxPixels = 12500000;       // iPhone canvas limit is ~16.7 MP; 48 MP photos are scaled down
     const ink = [24, 24, 26];
-    const fontFamily = '"Times New Roman", Times, Georgia, serif';
+    const fonts = {
+        unbounded: '"RevealUnbounded", "Unbounded", sans-serif',
+        times: '"Times New Roman", Times, Georgia, serif'
+    };
+
+    // the calculator page has no Unbounded: load it from the cached file before drawing (canvas needs a loaded font)
+    let fontReady = null;
+    function loadFonts() {
+        if (!fontReady) {
+            let face = new FontFace("RevealUnbounded", "url(" + new URL("fonts/unbounded-semibold.woff2", document.baseURI) + ")", { weight: "600" });
+            fontReady = face.load().then(loaded => document.fonts.add(loaded)).catch(_ => { });
+        }
+        return fontReady;
+    }
+
+    // size × fontScale, ink opacity, font; older saved photos have no opacity and font yet
+    function getStyle(meta) {
+        meta = meta || {};
+        return {
+            fontScale: meta.fontScale || 1,
+            opacity: meta.opacity >= 0.1 && meta.opacity <= 1 ? meta.opacity : 0.9,
+            font: fonts[meta.font] ? meta.font : "unbounded"
+        };
+    }
 
     // ---------- storage ----------
 
@@ -90,6 +114,7 @@ const reveal = (_ => {
                     let old = getMeta();
                     setMeta({
                         width: canvas.width, height: canvas.height, fontScale: old ? old.fontScale : 1,
+                        opacity: old ? old.opacity : 0.9, font: old ? old.font : "unbounded",
                         corners: [[0.2, 0.25], [0.8, 0.25], [0.8, 0.75], [0.2, 0.75]]
                     });
                 }));
@@ -184,7 +209,7 @@ const reveal = (_ => {
     }
 
     // black printed text, centred on a sheet of width × height; the size is the largest that fits, times fontScale
-    function textCanvas(text, width, height, fontScale) {
+    function textCanvas(text, width, height, fontScale, fontFamily) {
         let canvas = document.createElement("canvas");
         canvas.width = Math.max(1, Math.round(width));
         canvas.height = Math.max(1, Math.round(height));
@@ -256,14 +281,16 @@ const reveal = (_ => {
     }
 
     // draws the sheet text onto g in perspective; corners in pixels of g's canvas
-    function drawOnSheet(g, text, corners, fontScale) {
+    function drawOnSheet(g, text, corners, style) {
+        style = getStyle(style);
         let [tl, tr, br, bl] = corners;
         let dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
         let width = (dist(tl, tr) + dist(bl, br)) / 2;
         let height = (dist(tl, bl) + dist(tr, br)) / 2;
         // the text is drawn at most ~1.5× the sheet's size on screen and sampled from there
         let k = Math.min(1.5, 2400 / Math.max(width, height));
-        let source = textCanvas(text, width * k, height * k, fontScale);
+        let source = textCanvas(text, width * k, height * k, style.fontScale, fonts[style.font]);
+        let opacity = style.opacity;
         let sw = source.width, sh = source.height;
         let alpha = source.getContext("2d").getImageData(0, 0, sw, sh).data;
         let h = homography(corners, [[0, 0], [sw, 0], [sw, sh], [0, sh]]);
@@ -296,7 +323,7 @@ const reveal = (_ => {
                     data[i] = ink[0];
                     data[i + 1] = ink[1];
                     data[i + 2] = ink[2];
-                    data[i + 3] = a * 0.92;
+                    data[i + 3] = a * opacity;
                 }
             }
         }
@@ -479,7 +506,7 @@ const reveal = (_ => {
             return cache.promise;
         }
         let meta = getMeta();
-        let promise = loadPhoto().then(stored => {
+        let promise = Promise.all([loadPhoto(), loadFonts()]).then(([stored]) => {
             if (!stored || !meta) {
                 throw new Error("no photo");
             }
@@ -489,7 +516,7 @@ const reveal = (_ => {
                 canvas.height = image.height;
                 let g = canvas.getContext("2d");
                 g.drawImage(image, 0, 0);
-                drawOnSheet(g, fillTemplate(getTemplate(), date), cornersInPixels(meta, canvas.width, canvas.height), meta.fontScale || 1);
+                drawOnSheet(g, fillTemplate(getTemplate(), date), cornersInPixels(meta, canvas.width, canvas.height), meta);
                 return toBlob(canvas, 0.93).then(blob => blob.arrayBuffer()).then(buffer =>
                     withExif(new Uint8Array(buffer), buildExif(stored.exif, takenDate(getHours()), canvas.width, canvas.height)));
             });
@@ -500,7 +527,7 @@ const reveal = (_ => {
     }
 
     return {
-        hasPhoto, getMeta, setMeta, getHours, getTemplate, loadPhoto, savePhoto, removePhoto, decode,
+        hasPhoto, getMeta, setMeta, getStyle, loadFonts, getHours, getTemplate, loadPhoto, savePhoto, removePhoto, decode,
         fillTemplate, orderCorners, drawOnSheet, cornersInPixels, render
     };
 })();
