@@ -183,6 +183,35 @@
             <b>8</b>
             <p>Удержите палец на картинке выше → «Добавить в Фото» (или «Сохранить в Фото»).</p>
         </div>
+
+        <div class="setting">
+            <h2>Удержание и щелчок</h2>
+            <p>Удержите кнопку указанное время и отпустите. Запишите, на каких номерах был щелчок при отпускании. Счётчик растёт, только если iPhone засчитал тап.</p>
+        </div>
+
+        <div class="test">
+            <b>9</b>
+            <p>Удержать 0,6 с и отпустить.</p>
+            <div class="act"><button class="key" data-hold="600">0,6 с</button><small>0</small></div>
+        </div>
+
+        <div class="test">
+            <b>10</b>
+            <p>Удержать 1 с и отпустить.</p>
+            <div class="act"><button class="key" data-hold="1000">1 с</button><small>0</small></div>
+        </div>
+
+        <div class="test">
+            <b>11</b>
+            <p>Удержать 1,5 с и отпустить.</p>
+            <div class="act"><button class="key" data-hold="1500">1,5 с</button><small>0</small></div>
+        </div>
+
+        <div class="test">
+            <b>12</b>
+            <p>Как кнопка-калькулятор: «Поделиться» открывается в момент отпускания пальца. Должно открыться меню с картинкой.</p>
+            <div class="act"><div class="key" id="t12" style="display:grid;place-items:center">Отпустить</div><small id="c12"></small></div>
+        </div>
     </main>
 
     <script>
@@ -350,6 +379,36 @@
         // the file is ready before the tap: Safari allows share only right inside the tap
         document.getElementById("t7").addEventListener("click", _ => {
             const result = document.getElementById("c7");
+            if (!shotFile || !navigator.canShare || !navigator.canShare({ files: [shotFile] })) {
+                result.textContent = "Поделиться файлом нельзя";
+                return;
+            }
+            navigator.share({ files: [shotFile] })
+                .then(_ => result.textContent = "Готово")
+                .catch(e => result.textContent = e.name);
+        });
+
+        // 9–11: does iOS still count a tap (click) after a hold of this length; the key turns orange when the time is up
+        document.querySelectorAll("[data-hold]").forEach(key => {
+            let start = 0;
+            key.addEventListener("pointerdown", _ => {
+                start = Date.now();
+                setTimeout(_ => key.classList.add("held"), Number(key.dataset.hold));
+            });
+            key.addEventListener("pointerup", _ => setTimeout(_ => key.classList.remove("held"), 300));
+            key.addEventListener("contextmenu", e => e.preventDefault());
+            key.addEventListener("click", _ => {
+                if (Date.now() - start >= Number(key.dataset.hold)) {
+                    hiddenSwitch();
+                    let c = key.nextElementSibling;
+                    c.textContent = Number(c.textContent) + 1;
+                }
+            });
+        });
+
+        // 12: share sheet opened from pointerup on a div, like the calculator key
+        document.getElementById("t12").addEventListener("pointerup", _ => {
+            const result = document.getElementById("c12");
             if (!shotFile || !navigator.canShare || !navigator.canShare({ files: [shotFile] })) {
                 result.textContent = "Поделиться файлом нельзя";
                 return;
