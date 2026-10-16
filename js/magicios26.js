@@ -470,12 +470,24 @@ function noteEquals() {
     }
 }
 
+// calculator.js: the result under "=" (with the date typed it is DD + MM + YYYY, e.g. 2014); shown again on the peek
+function noteEqualsResult(value) {
+    let birthday = loadMagicState("magicBirthday");
+    if (birthday && birthday.date && birthday.sum === undefined) {
+        birthday.sum = String(value);
+        saveMagicState("magicBirthday", birthday);
+        prepareReveal(birthday.date);
+    }
+}
+
 function isValidDate(day, month, year) {
     return [day, month, year].every(Number.isInteger) && year >= 1900 && year <= new Date().getFullYear()
         && month >= 1 && month <= 12 && day >= 1 && day <= new Date(year, month, 0).getDate();
 }
 
-// on a 0 screen: arm; once the date is typed: show "Libra · 45 · Sun" instead of the example for 3.5 s and switch off
+// on a 0 screen: arm; once the date is typed: show "Libra · 45 · Sun" instead of the example and the sum under "="
+// (2014) instead of the number, both for 3.5 s. Without a reveal photo it switches off; with one it stays on
+// (the peek can be repeated) until the photo thumbnail is closed
 function applyBirthday() {
     let birthday = loadMagicState("magicBirthday");
     if (!birthday) {
@@ -483,9 +495,86 @@ function applyBirthday() {
             saveMagicState("magicBirthday", { numbers: [] });
         }
     } else if (birthday.date) {
-        saveMagicState("magicBirthday", null);
+        if (!reveal.hasPhoto()) {
+            saveMagicState("magicBirthday", null);
+        }
         peekText(expressionEl, getBirthdayInfo(...birthday.date));
+        if (birthday.sum !== undefined) {
+            peekText(displayEl, formatValue(birthday.sum), "displayS1");
+            for (let size = 2; size <= 12 && displayEl.scrollWidth > displayEl.clientWidth; size++) {
+                displayEl.className = "displayS" + size;
+            }
+        }
     }
+}
+
+// ---------- photo reveal (js/reveal.js): tap on the calculator key while the birthday trick is on ----------
+
+function prepareReveal(date) {
+    if (reveal.hasPhoto()) {
+        reveal.render(date).catch(_ => { });
+    }
+}
+
+// the calculator key: photo while the birthday trick is on (nothing until the date is typed), otherwise DDF manual
+function modeKeyTap() {
+    let birthday = loadMagicState("magicBirthday");
+    if (!birthday || isClientMode()) {
+        armDDFManual();
+        return;
+    }
+    if (birthday.date && reveal.hasPhoto() && !revealShotEl) {
+        feedback(true);
+        reveal.render(birthday.date).then(showRevealShot).catch(_ => { });
+    }
+}
+
+// a thumbnail in the bottom-left corner like after a screenshot: long-press it → "Add to Photos".
+// A tap anywhere else (or 15 s) closes it and ends the birthday trick
+let revealShotEl = null;
+
+function showRevealShot(blob) {
+    if (revealShotEl) {
+        return;
+    }
+    let url = URL.createObjectURL(blob);
+    let catcher = document.createElement("div");
+    catcher.id = "revealCatcher";
+    let shot = document.createElement("div");
+    shot.id = "revealShot";
+    let image = document.createElement("img");
+    image.src = url;
+    image.alt = "";
+    shot.append(image);
+    document.body.append(catcher, shot);
+    revealShotEl = shot;
+    requestAnimationFrame(_ => requestAnimationFrame(_ => shot.classList.add("show")));
+    let timer;
+    let close = _ => {
+        clearTimeout(timer);
+        if (revealShotEl !== shot) {
+            return;
+        }
+        revealShotEl = null;
+        saveMagicState("magicBirthday", null);
+        shot.classList.remove("show");
+        catcher.remove();
+        setTimeout(_ => {
+            shot.remove();
+            URL.revokeObjectURL(url);
+        }, 300);
+    };
+    // the context menu of a long press must not count as "closed": only taps on the calculator close it
+    catcher.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        close();
+    });
+    let restart = _ => {
+        clearTimeout(timer);
+        timer = setTimeout(close, 15000);
+    };
+    shot.addEventListener("pointerdown", restart);
+    restart();
 }
 
 function getBirthdayInfo(day, month, year) {

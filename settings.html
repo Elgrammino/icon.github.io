@@ -298,6 +298,186 @@
             }
         }
 
+        /* photo reveal inside the birthday plate */
+        .reveal-photo {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .reveal-photo img {
+            flex: none;
+            width: 66px;
+            height: 88px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: inset 0 0 0 0.5px var(--line);
+        }
+
+        .reveal-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .small-button {
+            display: inline-flex;
+            align-items: center;
+            min-height: 40px;
+            padding: 0 14px;
+            border: 0;
+            border-radius: 999px;
+            background: rgb(0 0 0 / 45%);
+            box-shadow: inset 0 0 0 0.5px var(--line);
+            color: var(--text);
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 13.5px;
+            cursor: pointer;
+        }
+
+        .small-button.accent {
+            background: var(--glass-accent);
+            box-shadow: var(--glass-accent-rim);
+            color: var(--accent-ink);
+        }
+
+        .small-button.danger {
+            color: #FF6B5E;
+        }
+
+        .small-button input {
+            display: none;
+        }
+
+        textarea.field {
+            min-height: 112px;
+            padding: 10px 14px;
+            font-size: 15px;
+            line-height: 1.45;
+            resize: vertical;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chips button {
+            min-height: 34px;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--accent);
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .plate-body .example {
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #F4F1EA;
+            color: #18181A;
+            font-family: "Times New Roman", Times, Georgia, serif;
+            font-size: 15px;
+        }
+
+        .sub-label {
+            margin: 4px 0 -4px 4px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* corner editor: the photo on the whole screen, 4 dots, a loupe over the finger */
+        .editor {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            background: #000;
+            touch-action: none;
+        }
+
+        .editor[hidden] {
+            display: none;
+        }
+
+        .editor-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: calc(8px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+        }
+
+        .editor-bar span {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .editor-stage {
+            position: relative;
+            display: grid;
+            place-items: center;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .editor-stage canvas.photo {
+            display: block;
+        }
+
+        .handle {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            margin: -22px 0 0 -22px;
+            border-radius: 50%;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        .handle::after {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 2px #FFF, 0 2px 8px rgb(0 0 0 / 60%);
+        }
+
+        .loupe {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px #FFF, 0 6px 20px rgb(0 0 0 / 60%);
+            pointer-events: none;
+        }
+
+        .editor-tools {
+            display: grid;
+            gap: 6px;
+            padding: 10px max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .editor-tools input {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
         .glass-button {
             display: inline-flex;
             align-items: center;
@@ -355,6 +535,7 @@
     <script src="./js/i18n/i18n.js"></script>
     <script src="./js/i18n/i18nextBrowserLanguageDetector.min.js"></script>
     <script src="./js/i18n/i18next.js"></script>
+    <script src="./js/reveal.js"></script>
 </head>
 
 <body>
@@ -392,6 +573,21 @@
                 </summary>
                 <div class="plate-body">
                     <p id="birthdayHint"></p>
+                    <div class="reveal-photo">
+                        <img id="revealThumb" alt="" hidden>
+                        <div class="reveal-buttons">
+                            <label class="small-button accent"><span id="revealAdd"></span><input type="file" accept="image/*" id="revealFile"></label>
+                            <button type="button" class="small-button" id="revealCorners"></button>
+                            <button type="button" class="small-button danger" id="revealRemove"></button>
+                        </div>
+                    </div>
+                    <p id="revealNoPhoto"></p>
+                    <div class="inline"><span id="revealHoursLabel"></span><span class="swipe" id="revealHours" tabindex="0" role="spinbutton" aria-labelledby="revealHoursLabel"></span></div>
+                    <div class="sub-label" id="revealTextLabel"></div>
+                    <textarea class="field" id="revealTemplate" rows="4" aria-labelledby="revealTextLabel"></textarea>
+                    <div class="chips" id="revealTags"></div>
+                    <div class="sub-label" id="revealExampleLabel"></div>
+                    <div class="example" id="revealExample"></div>
                 </div>
             </details>
         </div>
@@ -416,6 +612,18 @@
             <small>PayPal</small>
         </form>
     </main>
+    <div class="editor" id="editor" hidden>
+        <div class="editor-bar">
+            <button type="button" class="small-button" id="editorCancel"></button>
+            <span id="editorHint"></span>
+            <button type="button" class="small-button accent" id="editorDone"></button>
+        </div>
+        <div class="editor-stage" id="editorStage">
+            <canvas class="photo" id="editorCanvas"></canvas>
+            <canvas class="loupe" id="editorLoupe" width="240" height="240" hidden></canvas>
+        </div>
+        <label class="editor-tools"><span id="editorFontLabel"></span><input type="range" id="editorFont" min="0.4" max="1.6" step="0.05" value="1"></label>
+    </div>
     <div class="toast" id="toast" role="status"></div>
     <script>
         const presetsMax = 3;
@@ -433,6 +641,7 @@
             Object.entries(texts).forEach(([id, key]) => document.getElementById(id).textContent = t(key));
             setupPresets();
             setupMemoryIndex();
+            setupReveal();
             setupInterfaceSwitch();
             setupLink();
         });
@@ -648,6 +857,210 @@
                 showToast("✓ " + t("savedShort"));
             });
             hint();
+        }
+
+        // ---------- photo reveal (js/reveal.js): photo with a blank sheet, its corners, the text, hours ago ----------
+
+        const sampleDate = [14, 10, 1990];
+
+        function setupReveal() {
+            const ids = {
+                revealCorners: "revealCorners", revealRemove: "revealRemove", revealHoursLabel: "revealHours",
+                revealTextLabel: "revealText", revealExampleLabel: "revealExample", revealNoPhoto: "revealNoPhoto",
+                editorCancel: "revealCancel", editorDone: "revealDone", editorHint: "revealCornersHint", editorFontLabel: "revealFontSize"
+            };
+            Object.entries(ids).forEach(([id, key]) => document.getElementById(id).textContent = t(key));
+
+            let file = document.getElementById("revealFile");
+            file.addEventListener("change", _ => {
+                if (!file.files[0]) {
+                    return;
+                }
+                showToast(t("revealWait"));
+                reveal.savePhoto(file.files[0])
+                    .then(_ => {
+                        file.value = "";
+                        renderRevealPhoto();
+                        openEditor();
+                    })
+                    .catch(_ => showToast(t("revealError")));
+            });
+            document.getElementById("revealCorners").addEventListener("click", openEditor);
+            document.getElementById("revealRemove").addEventListener("click", _ => {
+                reveal.removePhoto().then(renderRevealPhoto);
+                showToast("✓ " + t("savedShort"));
+            });
+
+            let hours = Array.from({ length: 48 }, (_, i) => String(i + 1));
+            digitPicker(document.getElementById("revealHours"), _ => hours, String(reveal.getHours()), n => {
+                try { localStorage.setItem("revealHours", n); } catch (e) { }
+                showToast("✓ " + t("savedShort"));
+            });
+
+            let template = document.getElementById("revealTemplate");
+            template.value = reveal.getTemplate();
+            let example = _ => document.getElementById("revealExample").textContent = reveal.fillTemplate(template.value, sampleDate);
+            template.addEventListener("input", _ => {
+                try { localStorage.setItem("revealTemplate", template.value); } catch (e) { }
+                example();
+            });
+            template.addEventListener("change", _ => showToast("✓ " + t("savedShort")));
+            let isRu = i18next.language.startsWith("ru");
+            (isRu ? ["знак", "день", "дата", "дней", "возраст"] : ["sign", "day", "date", "days", "age"]).forEach(tag => {
+                let chip = document.createElement("button");
+                chip.type = "button";
+                chip.textContent = tag;
+                // keep the cursor in the text: the tag goes where it stands
+                chip.addEventListener("pointerdown", e => e.preventDefault());
+                chip.addEventListener("click", _ => {
+                    let start = template.selectionStart ?? template.value.length;
+                    let end = template.selectionEnd ?? start;
+                    template.setRangeText("{" + tag + "}", start, end, "end");
+                    template.dispatchEvent(new Event("input"));
+                    template.focus();
+                });
+                document.getElementById("revealTags").append(chip);
+            });
+            example();
+            renderRevealPhoto();
+        }
+
+        let revealThumbUrl;
+        function renderRevealPhoto() {
+            let isPhoto = reveal.hasPhoto();
+            let thumb = document.getElementById("revealThumb");
+            document.getElementById("revealAdd").textContent = t(isPhoto ? "revealReplace" : "revealAdd");
+            document.getElementById("revealCorners").hidden = !isPhoto;
+            document.getElementById("revealRemove").hidden = !isPhoto;
+            document.getElementById("revealNoPhoto").hidden = isPhoto;
+            thumb.hidden = !isPhoto;
+            if (revealThumbUrl) {
+                URL.revokeObjectURL(revealThumbUrl);
+                revealThumbUrl = null;
+            }
+            if (isPhoto) {
+                reveal.loadPhoto().then(stored => {
+                    if (stored) {
+                        revealThumbUrl = URL.createObjectURL(stored.blob);
+                        thumb.src = revealThumbUrl;
+                    }
+                });
+            }
+        }
+
+        // the photo fits the screen; dots are dragged with a loupe above the finger, the sample text follows at once
+        function openEditor() {
+            let meta = reveal.getMeta();
+            if (!meta) {
+                return;
+            }
+            reveal.loadPhoto().then(stored => reveal.decode(stored.blob)).then(image => {
+                let editor = document.getElementById("editor");
+                let stage = document.getElementById("editorStage");
+                let canvas = document.getElementById("editorCanvas");
+                let loupe = document.getElementById("editorLoupe");
+                let font = document.getElementById("editorFont");
+                editor.hidden = false;
+                let corners = meta.corners.map(c => c.slice());
+                font.value = meta.fontScale || 1;
+                let box = stage.getBoundingClientRect();
+                let scale = Math.min((box.width - 24) / image.width, (box.height - 24) / image.height);
+                let cssW = Math.round(image.width * scale), cssH = Math.round(image.height * scale);
+                let dpr = Math.min(2, window.devicePixelRatio || 1);
+                canvas.style.width = cssW + "px";
+                canvas.style.height = cssH + "px";
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                let g = canvas.getContext("2d");
+                let text = reveal.fillTemplate(reveal.getTemplate(), sampleDate);
+                let frame = 0;
+                let draw = _ => {
+                    frame = 0;
+                    g.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    reveal.drawOnSheet(g, text, reveal.orderCorners(corners).map(([x, y]) => [x * canvas.width, y * canvas.height]), Number(font.value));
+                };
+                let redraw = _ => frame = frame || requestAnimationFrame(draw);
+                draw();
+
+                stage.querySelectorAll(".handle").forEach(h => h.remove());
+                let origin = _ => {
+                    let r = canvas.getBoundingClientRect();
+                    let s = stage.getBoundingClientRect();
+                    return { left: r.left - s.left, top: r.top - s.top, width: r.width, height: r.height, abs: r };
+                };
+                let place = (handle, i) => {
+                    let o = origin();
+                    handle.style.left = o.left + corners[i][0] * o.width + "px";
+                    handle.style.top = o.top + corners[i][1] * o.height + "px";
+                };
+                let lg = loupe.getContext("2d");
+                let showLoupe = (i, handle) => {
+                    let o = origin();
+                    let [x, y] = corners[i];
+                    let zoom = 3;
+                    let size = 240 / (zoom * scale * 2);
+                    lg.fillStyle = "#000";
+                    lg.fillRect(0, 0, 240, 240);
+                    lg.drawImage(image, x * image.width - size / 2, y * image.height - size / 2, size, size, 0, 0, 240, 240);
+                    lg.strokeStyle = "#FF9200";
+                    lg.lineWidth = 2;
+                    lg.beginPath();
+                    lg.moveTo(120, 96); lg.lineTo(120, 144);
+                    lg.moveTo(96, 120); lg.lineTo(144, 120);
+                    lg.stroke();
+                    let left = o.left + x * o.width - 60;
+                    let top = o.top + y * o.height - 160;
+                    if (top < 0) {
+                        top = o.top + y * o.height + 40;
+                    }
+                    loupe.style.left = Math.max(0, Math.min(stage.clientWidth - 120, left)) + "px";
+                    loupe.style.top = top + "px";
+                    loupe.hidden = false;
+                };
+                corners.forEach((_, i) => {
+                    let handle = document.createElement("div");
+                    handle.className = "handle";
+                    stage.append(handle);
+                    place(handle, i);
+                    let grab = null;
+                    handle.addEventListener("pointerdown", e => {
+                        let o = origin();
+                        // keep the offset between the finger and the dot, so the dot does not jump under the finger
+                        grab = { dx: e.clientX - (o.abs.left + corners[i][0] * o.width), dy: e.clientY - (o.abs.top + corners[i][1] * o.height) };
+                        handle.setPointerCapture(e.pointerId);
+                        showLoupe(i, handle);
+                    });
+                    handle.addEventListener("pointermove", e => {
+                        if (!grab) {
+                            return;
+                        }
+                        let o = origin();
+                        corners[i] = [
+                            Math.min(1, Math.max(0, (e.clientX - grab.dx - o.abs.left) / o.width)),
+                            Math.min(1, Math.max(0, (e.clientY - grab.dy - o.abs.top) / o.height))
+                        ];
+                        place(handle, i);
+                        showLoupe(i, handle);
+                        redraw();
+                    });
+                    let drop = _ => {
+                        grab = null;
+                        loupe.hidden = true;
+                    };
+                    handle.addEventListener("pointerup", drop);
+                    handle.addEventListener("pointercancel", drop);
+                });
+                font.oninput = redraw;
+                let close = isSave => {
+                    if (isSave) {
+                        reveal.setMeta(Object.assign(reveal.getMeta(), { corners, fontScale: Number(font.value) }));
+                        showToast("✓ " + t("savedShort"));
+                    }
+                    editor.hidden = true;
+                };
+                document.getElementById("editorDone").onclick = _ => close(true);
+                document.getElementById("editorCancel").onclick = _ => close(false);
+            }).catch(_ => showToast(t("revealError")));
         }
 
         // ---------- calculator look ----------

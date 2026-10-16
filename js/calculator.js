@@ -114,14 +114,18 @@ let undoState = null;
 displayEl.addEventListener("pointerdown", startBtnHandler);
 displayEl.addEventListener("pointerup", endBtnHandler);
 displayEl.addEventListener("pointercancel", cancelBtnHandler);
+displayEl.addEventListener("click", flushHaptic);
 for (el of buttonElList) {
+    el.addEventListener("click", flushHaptic);
     el.addEventListener("pointerdown", startBtnHandler);
     el.addEventListener("pointerup", endBtnHandler);
     el.addEventListener("pointercancel", cancelBtnHandler);
 }
 
-// top keys: glass press animation; the clock opens the history, the calculator key arms DDF (armDDFManual in magicios26.js)
+// top keys: glass press animation; the clock opens the history, the calculator key arms DDF
+// or shows the photo reveal (modeKeyTap in magicios26.js)
 for (el of [document.getElementById("historyKey"), document.getElementById("modeKey")]) {
+    el.addEventListener("click", flushHaptic);
     el.addEventListener("pointerdown", e => {
         e.currentTarget.classList.remove("pushOff");
         e.currentTarget.classList.add("pushDigit");
@@ -136,7 +140,7 @@ for (el of [document.getElementById("historyKey"), document.getElementById("mode
                 if (e.currentTarget.id === "historyKey") {
                     openHistory();
                 } else {
-                    armDDFManual();
+                    modeKeyTap();
                 }
             }
         });
@@ -253,13 +257,23 @@ function feedback(isMagic) {
             navigator.vibrate(1);
         }
     } else if (isMagic && !isClientMode()) {
-        iosHaptic();
+        hapticRequest = Date.now();
     }
 }
 
 // Safari on iPhone has no navigator.vibrate, but toggling an iOS switch (<input type="checkbox" switch>, iOS 18+)
-// gives the system haptic tick, also when the click comes from code. The switch is hidden and never shown.
+// gives the system haptic tick. Since iOS 26.5 only from inside a tap (click event): not from a timer, pointerdown
+// or pointerup, and iOS counts no tap after a hold of ~1.5 s or more. So a magic hold (1 s) only asks for the tick,
+// and the click that follows the release plays it (flushHaptic on every key).
 // Off in Low Power Mode or with System Haptics turned off; elsewhere the click just does nothing
+let hapticRequest = 0;
+function flushHaptic() {
+    if (hapticRequest && Date.now() - hapticRequest < 3000) {
+        iosHaptic();
+    }
+    hapticRequest = 0;
+}
+
 let hapticLabel;
 function iosHaptic() {
     try {
@@ -328,7 +342,7 @@ function startBtnHandler(e) {
         longPressTimer = setTimeout(_ => {
             feedback(true);
             longPressTarget = target;
-        }, 2000);
+        }, 1000);
     }
 }
 
@@ -476,6 +490,9 @@ function btnHandler(target) {
                 let expressionLine = target.id === "=" ? calculateEquals() : calculateOperation(target.id);
                 let calculatedValue = resultValue;
                 applyPostMagic(target.id);
+                if (target.id === "=") {
+                    noteEqualsResult(resultValue);
+                }
                 if (target.id === "=") {
                     add2MagicHistory(resultValue.toString());
                     if (!Object.is(calculatedValue, resultValue)) {

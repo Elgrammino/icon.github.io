@@ -43,8 +43,24 @@ const i18n_en = {
         "settings": "Settings",
         "savedShort": "Saved",
         "presets": "Presets",
+        "weekdayOn": ["on Sunday", "on Monday", "on Tuesday", "on Wednesday", "on Thursday", "on Friday", "on Saturday"],
+        "revealTemplateDefault": "Tomorrow I perform for a person born under the sign of {sign}, born {day}, {date}, who will celebrate the birthday in {days}.",
+        "revealAdd": "Add photo",
+        "revealReplace": "Replace photo",
+        "revealCorners": "Mark corners",
+        "revealRemove": "Delete photo",
+        "revealHours": "Taken hours ago",
+        "revealText": "Text on the sheet",
+        "revealExample": "Example",
+        "revealFontSize": "Text size",
+        "revealCornersHint": "Drag the dots onto the corners of the sheet",
+        "revealDone": "Done",
+        "revealCancel": "Cancel",
+        "revealWait": "Processing the photo…",
+        "revealError": "Could not open the photo",
+        "revealNoPhoto": "No photo: a tap on the calculator key shows nothing.",
         "settingsMagic": "Tricks",
-        "presetsHint": "Save a number, a way and a digit. Holding that digit for 2 seconds turns the function on with this number, as if it was typed. Up to three presets.",
+        "presetsHint": "Save a number, a way and a digit. Holding that digit for 1 second turns the function on with this number, as if it was typed. Up to three presets.",
         "presetAdd": "+ Add preset",
         "presetName": "Preset",
         "presetNumber": "Number",
@@ -57,7 +73,7 @@ const i18n_en = {
         "numberMemoryHint": "On 0 hold ÷: the calculator remembers number {{n}} typed by hand. Hold ÷ again: the number shows instead of 0 for 3–4 seconds and goes to the history.",
         "birthday": "Birthday",
         "birthdayFormat": "DD + MM + YYYY",
-        "birthdayHint": "On 0 hold ×, then the spectator types DD + MM + YYYY =. Hold × again: instead of the example the zodiac sign, days to the birthday and the weekday of birth show for 3–4 seconds.",
+        "birthdayHint": "On 0 hold ×, then the spectator types DD + MM + YYYY =. Hold × again: instead of the example the zodiac sign, days to the birthday and the weekday of birth show for 3–4 seconds. With a photo added, after '=' a tap on the calculator key shows a thumbnail: long-press it → Add to Photos.",
         "instructions": "Instructions",
         "linkNoId": "Turn on remote control first (hold ±)",
         "readme_part_1": `<div>
@@ -107,7 +123,7 @@ const i18n_en = {
             <p>The forcing function operates in two modes:</p>
             <ul>
             <li><strong>automatic</strong> - turn the device screen down. The application automatically detects when the phone is upside down and blocks input as long as the phone is upside down.</li>
-            <li><strong>manual</strong> - hold down the 0 button for 2 seconds until the history button lights up. This allows you to precisely control when the phone will block input. After turning on, the locking begins from the moment you first tap on the screen and for 10 seconds until the history button lights up again. This mode allows you to force the number by asking the viewer to close their eyes and not turn the phone over. Has priority over automatic mode.</li>
+            <li><strong>manual</strong> - hold down the 0 button for 1 second (2 seconds in the classic look) until the history button lights up. This allows you to precisely control when the phone will block input. After turning on, the locking begins from the moment you first tap on the screen and for 10 seconds until the history button lights up again. This mode allows you to force the number by asking the viewer to close their eyes and not turn the phone over. Has priority over automatic mode.</li>
             </ul>
             <p>If the application has access (if not, then after enabling the function the application will notify about it) to the orientation of the device in space, then the mode will be <strong>automatic</strong>. At this moment, clicking on the screen causes a number to appear that is necessary to calculate the forced <strong>NUMBER</strong>. Formula: (any_calculations)&lt;any_operation&gt;X=<strong>NUMBER</strong>. Where X is the number that will be substituted for clicks on the screen. The required number is adapted to the last operation before turning the device over. But it is advisable to use + or -. In the case of the &times; and &divide; operations, the result of the calculation may not be accurate when duplicated on other calculators due to the nature of irrational numbers.</p>
             <p>If notifications are enabled or X=<strong>NUMBER</strong>, then X will be entered one digit for each touch on the screen while input is blocked. The number of required touches will be displayed in notifications if available. If not, the X will be displayed in its entirety the first time you tap on the screen.&nbsp;Each tap on the screen will trigger an animation of pressing the desired button. This allows to broadcast phone screen to a large screen on stage.</p>
@@ -129,11 +145,11 @@ const i18n_en = {
             <li><strong>way</strong>: Toxic (as holding "+"), DDF (as holding "−": turn the phone over or hold 0) or DDF manual (as a tap on the calculator key: touches type the number right away);</li>
             <li><strong>digit</strong> from 1 to 9 that turns the preset on. One digit cannot belong to two presets.</li>
             </ul>
-            <p>On the calculator hold that digit for 2 seconds: the screen goes back to 0 and the function is on with the preset number. Numbers 0–9 in DDF work as the date and time in N minutes. Up to three presets.</p>`,
+            <p>On the calculator hold that digit for 1 second: the screen goes back to 0 and the function is on with the preset number. Numbers 0–9 in DDF work as the date and time in N minutes. Up to three presets.</p>`,
         "readme_part_8": `<p style="text-align: center;"><strong>(×) Birthday</strong></p>
             <p>iOS 26 look only.</p>
             <ol>
-            <li>With 0 on the screen hold "×" for 2 seconds (the clock key lights up).</li>
+            <li>With 0 on the screen hold "×" for 1 second (the clock key lights up).</li>
             <li>The spectator types the birthday with "+": <strong>DD + MM + YYYY =</strong>, for example 14 + 10 + 1990 = 2014. Go on with the trick using this number.</li>
             <li>Any time later hold "×" again: instead of the example above the result you see for 3–4 seconds, for example, <strong>Libra · 45 · Sun</strong> — the zodiac sign, days to the birthday (0 means today) and the weekday of birth. Then the example comes back.</li>
             </ol>
@@ -141,7 +157,7 @@ const i18n_en = {
         "readme_part_9": `<p style="text-align: center;"><strong>(÷) Number memory</strong></p>
             <p>iOS 26 look only. On the settings page choose which typed number to remember: 1 to 9 (3 by default).</p>
             <ol>
-            <li>With 0 on the screen hold "÷" for 2 seconds.</li>
+            <li>With 0 on the screen hold "÷" for 1 second.</li>
             <li>The calculator counts the numbers typed by hand ("=" results do not count, the operation does not matter, after deleting what is left counts). For example with 3: "type any number — 12345, plus your birth year — 1993, plus the last 4 digits of your phone — 7788, equals". 7788 is remembered, however many steps follow.</li>
             <li>The spectator may clear the example and the history. Hold "÷" again: 7788 shows instead of 0 for 3–4 seconds, then 0 again. The number is added on top of the history and the mode is off.</li>
             </ol>
@@ -158,7 +174,7 @@ const i18n_en = {
             <p style="text-align: justify;"><span style="text-decoration: underline;">iOS</span>: permission to access the device orientation for the "DD force" function. Starting with iOS 13, the application is required to request permission every time the application is launched. The permission request will only occur when the "DD force" function is enabled.</p>
             <p style="text-align: center;">Functions</p>
             <p style="text-align: justify;">In the iOS 26 look holding the number display opens the settings: presets, number memory, calculator look, instructions, LINK for remote control. In the classic look it opens these instructions.</p>
-            <p style="text-align: justify;">Any function is activated by holding the corresponding button for 2 seconds. After that, the application will vibrate and the history button (clock) in the top left corner will light up for a moment. Vibration is not available on iOS.</p>
+            <p style="text-align: justify;">Any function is activated by holding the corresponding button for 1 second (2 seconds in the classic look). After that, the application will vibrate and the history button (clock) in the top left corner will light up for a moment. Vibration is not available on iOS.</p>
             <ul>
             <ul>
             <li style="text-align: justify;"><strong>(AC/C)</strong><br />Completely restarts the application and clears history.</li>
