@@ -468,7 +468,7 @@
 
         const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-        // digit picker: one digit on screen, swipe down = next, swipe up = previous, tap = next, wraps around.
+        // digit picker: one digit on screen, one swipe down = next, one swipe up = previous, tap = next, wraps around.
         // getList is asked on every step, so digits taken by other presets are always skipped
         function digitPicker(box, getList, value, onChange) {
             let span = document.createElement("span");
@@ -504,9 +504,9 @@
                 box.setPointerCapture(e.pointerId);
             });
             box.addEventListener("pointermove", e => {
-                if (startY !== null && Math.abs(e.clientY - startY) > 18) {
+                // one swipe = one digit, however long the finger keeps moving
+                if (startY !== null && !isMoved && Math.abs(e.clientY - startY) > 12) {
                     step(e.clientY > startY ? 1 : -1);
-                    startY = e.clientY;
                     isMoved = true;
                 }
             });
