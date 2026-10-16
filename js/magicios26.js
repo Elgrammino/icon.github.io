@@ -326,11 +326,13 @@ function applyPostMagic(targetId) {
 
 // one tap on the calculator key with a typed number = hold "−" and then hold "0":
 // the number becomes the DD force, the screen goes back to 0 and the next touches type it digit by digit.
-// Set up directly instead of applyDDForce(): its "no orientation access" pop-up is not needed in manual mode
+// Set up directly instead of applyDDForce(): its "no orientation access" pop-up is not needed in manual mode.
+// A preset passes the value: the 2 s hold has already flashed the clock, so it does not flash a second time
 function armDDFManual(value) {
     if (isClientMode() || value === undefined && !isDigitsTyping) {
         return;
     }
+    let isPreset = value !== undefined;
     value = value ?? getVisibleValue();
     disableMagic();
     if (isRCEnabled()) {
@@ -344,7 +346,9 @@ function armDDFManual(value) {
         overlayDDFEl.classList.remove("hidden");
     }
     reset();
-    feedback(true);
+    if (!isPreset) {
+        feedback(true);
+    }
 }
 
 function disableMagic() {

@@ -28,34 +28,139 @@
             margin-top: -4px;
         }
 
-        .presets {
-            display: grid;
-            gap: 12px;
-            margin-top: 14px;
+        /* grouped list like iPhone settings; every row is a glass plate that opens in place */
+        .group-label {
+            margin: 24px 6px 8px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
-        .preset {
+        .group {
             display: grid;
-            gap: 10px;
-            padding: 12px;
-            border-radius: var(--radius);
-            background: var(--bg);
-            box-shadow: inset 0 0 0 0.5px var(--line);
-        }
-
-        .preset-top {
-            display: flex;
             gap: 8px;
         }
 
-        .field {
+        .group-note {
+            margin: 8px 6px 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .plate {
+            border-radius: 18px;
+            background: var(--glass);
+            box-shadow: var(--glass-rim);
+            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur);
+        }
+
+        .plate>summary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 56px;
+            padding: 8px 14px 8px 12px;
+            border-radius: 18px;
+            list-style: none;
+            cursor: pointer;
+        }
+
+        .plate>summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .plate>summary:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .plate-text {
             flex: 1;
+            min-width: 0;
+        }
+
+        .plate-title,
+        .plate-sub {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .plate-title {
+            font-weight: 700;
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        .plate-sub {
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1.35;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .chevron {
+            flex: none;
+            width: 8px;
+            height: 8px;
+            margin: 0 4px;
+            border-right: 2px solid var(--muted);
+            border-bottom: 2px solid var(--muted);
+            transform: rotate(-45deg);
+            transition: transform 0.2s ease-out;
+        }
+
+        .plate[open]>summary .chevron {
+            transform: rotate(45deg);
+        }
+
+        /* round key like on the calculator: grey digit, orange operation */
+        .keycap {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #333333;
+            font-family: var(--display);
+            font-size: 14px;
+        }
+
+        .keycap.op {
+            background: var(--accent);
+            color: #FFFFFF;
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .plate-body {
+            display: grid;
+            gap: 10px;
+            padding: 2px 12px 14px;
+        }
+
+        .plate-body p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .field {
             min-width: 0;
             min-height: 44px;
             padding: 0 14px;
             border: 0;
             border-radius: 12px;
-            background: var(--surface-2);
+            background: rgb(0 0 0 / 45%);
             box-shadow: inset 0 0 0 0.5px var(--line);
             color: var(--text);
             font-family: var(--body);
@@ -77,26 +182,8 @@
 
         .field.number {
             font-family: var(--display);
-            font-size: 18px;
+            font-size: 17px;
             letter-spacing: 0.04em;
-        }
-
-        .remove {
-            flex: none;
-            width: 44px;
-            height: 44px;
-            border: 0;
-            border-radius: 50%;
-            background: var(--glass);
-            box-shadow: var(--glass-rim);
-            color: var(--muted);
-            font-size: 22px;
-            line-height: 1;
-            cursor: pointer;
-        }
-
-        .remove:active {
-            background: var(--glass-pressed);
         }
 
         .segmented.three {
@@ -104,45 +191,111 @@
         }
 
         .segmented.three button {
-            font-size: 14px;
+            min-height: 38px;
+            font-size: 13.5px;
         }
 
-        .label {
-            margin: 2px 0 -4px;
+        .inline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-left: 4px;
             color: var(--muted);
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
         }
 
-        /* digit keys: 44px targets, one per free digit */
-        .keys {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
-            gap: 6px;
-        }
-
-        .keys button {
+        .remove {
             min-height: 44px;
             border: 0;
-            border-radius: 999px;
-            background: var(--surface-2);
-            box-shadow: inset 0 0 0 0.5px var(--line);
-            color: var(--text);
-            font-family: var(--display);
-            font-weight: 600;
-            font-size: 16px;
+            border-radius: 12px;
+            background: none;
+            color: #FF6B5E;
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            transition: transform 0.1s ease-out;
         }
 
-        .keys button[aria-checked="true"] {
-            background: var(--glass-accent);
-            box-shadow: var(--glass-accent-rim);
-            color: var(--accent-ink);
+        .remove:active {
+            background: rgb(255 107 94 / 12%);
         }
 
-        .keys button:active {
-            transform: scale(0.95);
+        .add {
+            min-height: 52px;
+            border: 0;
+            color: var(--accent);
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .add:active {
+            background: var(--glass-pressed);
+        }
+
+        /* digit picker: one digit, swipe down = next, up = previous, tap = next; wraps around */
+        .swipe {
+            position: relative;
+            flex: none;
+            width: 54px;
+            height: 44px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgb(0 0 0 / 45%);
+            box-shadow: inset 0 0 0 0.5px var(--line);
+            cursor: ns-resize;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .swipe::before,
+        .swipe::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            margin-left: -3px;
+            border-left: 1.5px solid #6B6F74;
+            border-top: 1.5px solid #6B6F74;
+        }
+
+        .swipe::before {
+            top: 5px;
+            transform: rotate(45deg);
+        }
+
+        .swipe::after {
+            bottom: 5px;
+            transform: rotate(225deg);
+        }
+
+        .swipe span {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: var(--accent);
+            font-family: var(--display);
+            font-size: 18px;
+            transition: transform 0.18s ease-out, opacity 0.18s ease-out;
+        }
+
+        .swipe:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .swipe span,
+            .chevron {
+                transition: none;
+            }
         }
 
         .glass-button {
@@ -174,15 +327,6 @@
 
         .glass-button:disabled {
             opacity: 0.4;
-        }
-
-        #memoryIndex {
-            margin-top: 14px;
-        }
-
-        .add {
-            width: 100%;
-            margin-top: 12px;
         }
 
         .actions {
@@ -223,23 +367,34 @@
     <main class="page settings">
         <h1 id="title"></h1>
 
-        <section class="setting">
-            <h2 id="presetsTitle"></h2>
-            <p id="presetsHint"></p>
-            <div class="presets" id="presets"></div>
-            <button type="button" class="glass-button add" id="addPreset"></button>
-        </section>
+        <div class="group-label" id="presetsTitle"></div>
+        <div class="group" id="presets"></div>
+        <p class="group-note" id="presetsHint"></p>
 
-        <section class="setting">
-            <h2><span id="memoryTitle"></span><small>÷</small></h2>
-            <p id="memoryHint"></p>
-            <div class="keys" id="memoryIndex" role="radiogroup" aria-labelledby="memoryTitle"></div>
-        </section>
-
-        <section class="setting">
-            <h2><span id="birthdayTitle"></span><small>×</small></h2>
-            <p id="birthdayHint"></p>
-        </section>
+        <div class="group-label" id="magicTitle"></div>
+        <div class="group">
+            <details class="plate">
+                <summary>
+                    <span class="keycap op">÷</span>
+                    <span class="plate-text"><span class="plate-title" id="memoryTitle"></span></span>
+                    <span class="swipe" id="memoryIndex" tabindex="0" role="spinbutton" aria-labelledby="memoryTitle"></span>
+                    <span class="chevron"></span>
+                </summary>
+                <div class="plate-body">
+                    <p id="memoryHint"></p>
+                </div>
+            </details>
+            <details class="plate">
+                <summary>
+                    <span class="keycap op">×</span>
+                    <span class="plate-text"><span class="plate-title" id="birthdayTitle"></span><span class="plate-sub" id="birthdaySub"></span></span>
+                    <span class="chevron"></span>
+                </summary>
+                <div class="plate-body">
+                    <p id="birthdayHint"></p>
+                </div>
+            </details>
+        </div>
 
         <section class="setting">
             <h2 id="uiTitle"></h2>
@@ -272,8 +427,8 @@
             document.documentElement.lang = i18next.language;
             const texts = {
                 back: "backToCalculator", title: "settings", presetsTitle: "presets", presetsHint: "presetsHint",
-                addPreset: "presetAdd", memoryTitle: "numberMemory", birthdayTitle: "birthday", birthdayHint: "birthdayHint",
-                instructions: "instructions", donate: "donate"
+                magicTitle: "settingsMagic", memoryTitle: "numberMemory", birthdayTitle: "birthday", birthdaySub: "birthdayFormat",
+                birthdayHint: "birthdayHint", instructions: "instructions", donate: "donate"
             };
             Object.entries(texts).forEach(([id, key]) => document.getElementById(id).textContent = t(key));
             setupPresets();
@@ -311,64 +466,129 @@
             showToast("✓ " + t("savedShort"));
         }
 
+        const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+        // digit picker: one digit on screen, swipe down = next, swipe up = previous, tap = next, wraps around.
+        // getList is asked on every step, so digits taken by other presets are always skipped
+        function digitPicker(box, getList, value, onChange) {
+            let span = document.createElement("span");
+            span.textContent = value;
+            box.textContent = "";
+            box.append(span);
+            box.setAttribute("aria-valuenow", value);
+            let step = dir => {
+                let list = getList();
+                let i = list.indexOf(value);
+                value = list[((i < 0 ? 0 : i + dir) + list.length) % list.length];
+                if (span.textContent === value) {
+                    return;
+                }
+                // the new digit slides in from the side the finger came from
+                span.style.transition = "none";
+                span.style.transform = "translateY(" + dir * -60 + "%)";
+                span.style.opacity = 0;
+                span.textContent = value;
+                box.setAttribute("aria-valuenow", value);
+                requestAnimationFrame(_ => requestAnimationFrame(_ => {
+                    span.style.transition = "";
+                    span.style.transform = "";
+                    span.style.opacity = 1;
+                }));
+                onChange(value);
+            };
+            let startY = null;
+            let isMoved = false;
+            box.addEventListener("pointerdown", e => {
+                startY = e.clientY;
+                isMoved = false;
+                box.setPointerCapture(e.pointerId);
+            });
+            box.addEventListener("pointermove", e => {
+                if (startY !== null && Math.abs(e.clientY - startY) > 18) {
+                    step(e.clientY > startY ? 1 : -1);
+                    startY = e.clientY;
+                    isMoved = true;
+                }
+            });
+            box.addEventListener("pointerup", _ => {
+                if (startY !== null && !isMoved) {
+                    step(1);
+                }
+                startY = null;
+            });
+            box.addEventListener("pointercancel", _ => startY = null);
+            box.addEventListener("wheel", e => {
+                e.preventDefault();
+                step(e.deltaY > 0 ? 1 : -1);
+            }, { passive: false });
+            box.addEventListener("keydown", e => {
+                if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    step(e.key === "ArrowDown" ? 1 : -1);
+                }
+            });
+            // the picker can sit in a plate header: a tap on it must not open or close the plate
+            box.addEventListener("click", e => e.preventDefault());
+        }
+
         function freeKeys(presets, own) {
             let taken = presets.map(p => p.key);
-            return ["1", "2", "3", "4", "5", "6", "7", "8", "9"].filter(key => key === own || !taken.includes(key));
+            return digits.filter(key => key === own || !taken.includes(key));
         }
 
         function setupPresets() {
-            document.getElementById("addPreset").addEventListener("click", _ => {
-                let presets = loadPresets();
-                if (presets.length < presetsMax) {
-                    presets.push({ name: "", value: "", mode: "ddf", key: freeKeys(presets)[0] });
-                    savePresets(presets, true);
-                    document.querySelector(".preset:last-child .number").focus();
-                }
-            });
             renderPresets();
         }
 
-        function renderPresets() {
+        // every preset is a closed plate: key, name, number and way; a tap opens it for editing
+        function renderPresets(openIndex) {
             let presets = loadPresets();
             let list = document.getElementById("presets");
             list.textContent = "";
             presets.forEach((preset, index) => {
-                let card = document.createElement("div");
-                card.className = "preset";
-                card.innerHTML = `
-                    <div class="preset-top">
+                let plate = document.createElement("details");
+                plate.className = "plate";
+                plate.open = index === openIndex;
+                plate.innerHTML = `
+                    <summary>
+                        <span class="keycap"></span>
+                        <span class="plate-text"><span class="plate-title"></span><span class="plate-sub"></span></span>
+                        <span class="chevron"></span>
+                    </summary>
+                    <div class="plate-body">
                         <input class="field name" type="text" maxlength="24" autocomplete="off">
-                        <button type="button" class="remove" aria-label="">×</button>
-                    </div>
-                    <input class="field number" type="text" inputmode="numeric" maxlength="13" autocomplete="off">
-                    <div class="segmented three" role="radiogroup"></div>
-                    <div class="label"></div>
-                    <div class="keys" role="radiogroup"></div>`;
-                let name = card.querySelector(".name");
+                        <input class="field number" type="text" inputmode="numeric" maxlength="13" autocomplete="off">
+                        <div class="segmented three" role="radiogroup"></div>
+                        <div class="inline"><span class="label"></span><span class="swipe" tabindex="0" role="spinbutton"></span></div>
+                        <button type="button" class="remove"></button>
+                    </div>`;
+                let summary = _ => {
+                    plate.querySelector(".keycap").textContent = preset.key;
+                    plate.querySelector(".plate-title").textContent = preset.name || t("presetName") + " " + (index + 1);
+                    plate.querySelector(".plate-sub").textContent = (preset.value || "—") + " · " + t("presetMode_" + preset.mode);
+                };
+                summary();
+                let name = plate.querySelector(".name");
                 name.placeholder = t("presetName") + " " + (index + 1);
                 name.value = preset.name || "";
                 // saved while typing: leaving the page right away does not lose it
                 name.addEventListener("input", _ => {
-                    presets[index].name = name.value.trim();
+                    preset.name = name.value.trim();
                     write("presets", presets);
+                    summary();
                 });
                 name.addEventListener("change", _ => showToast("✓ " + t("savedShort")));
-                let remove = card.querySelector(".remove");
-                remove.setAttribute("aria-label", t("presetRemove"));
-                remove.addEventListener("click", _ => {
-                    presets.splice(index, 1);
-                    savePresets(presets, true);
-                });
-                let number = card.querySelector(".number");
+                let number = plate.querySelector(".number");
                 number.placeholder = t("presetNumber");
                 number.value = preset.value || "";
                 number.addEventListener("input", _ => {
                     number.value = number.value.replace(/\D/g, "");
-                    presets[index].value = number.value;
+                    preset.value = number.value;
                     write("presets", presets);
+                    summary();
                 });
                 number.addEventListener("change", _ => showToast("✓ " + t("savedShort")));
-                let modes = card.querySelector(".segmented");
+                let modes = plate.querySelector(".segmented");
                 presetModes.forEach(mode => {
                     let button = document.createElement("button");
                     button.type = "button";
@@ -376,53 +596,58 @@
                     button.setAttribute("aria-checked", preset.mode === mode);
                     button.textContent = t("presetMode_" + mode);
                     button.addEventListener("click", _ => {
-                        presets[index].mode = mode;
-                        savePresets(presets, true);
+                        preset.mode = mode;
+                        modes.querySelectorAll("button").forEach(b => b.setAttribute("aria-checked", b === button));
+                        summary();
+                        savePresets(presets);
                     });
                     modes.append(button);
                 });
-                card.querySelector(".label").textContent = t("presetKey");
-                let keys = card.querySelector(".keys");
-                freeKeys(presets, preset.key).forEach(key => {
-                    let button = document.createElement("button");
-                    button.type = "button";
-                    button.setAttribute("role", "radio");
-                    button.setAttribute("aria-checked", preset.key === key);
-                    button.textContent = key;
-                    button.addEventListener("click", _ => {
-                        presets[index].key = key;
-                        savePresets(presets, true);
-                    });
-                    keys.append(button);
+                let label = plate.querySelector(".label");
+                label.textContent = t("presetKey");
+                label.id = "presetKey" + index;
+                let picker = plate.querySelector(".swipe");
+                picker.setAttribute("aria-labelledby", label.id);
+                digitPicker(picker, _ => freeKeys(presets, preset.key), preset.key, key => {
+                    preset.key = key;
+                    summary();
+                    savePresets(presets);
                 });
-                list.append(card);
+                let remove = plate.querySelector(".remove");
+                remove.textContent = t("presetRemove");
+                remove.addEventListener("click", _ => {
+                    presets.splice(index, 1);
+                    savePresets(presets, true);
+                });
+                list.append(plate);
             });
-            document.getElementById("addPreset").hidden = presets.length >= presetsMax;
+            if (presets.length < presetsMax) {
+                let add = document.createElement("button");
+                add.type = "button";
+                add.className = "plate add";
+                add.textContent = t("presetAdd");
+                add.addEventListener("click", _ => {
+                    presets.push({ name: "", value: "", mode: "ddf", key: freeKeys(presets)[0] });
+                    savePresets(presets);
+                    renderPresets(presets.length - 1);
+                    list.querySelector("details[open] .number").focus();
+                });
+                list.append(add);
+            }
         }
 
         // ---------- number memory: which typed number (1–9) the calculator remembers ----------
 
         function setupMemoryIndex() {
-            let current = Number(localStorage.getItem("numberMemoryIndex")) || 3;
-            let box = document.getElementById("memoryIndex");
-            let render = _ => {
-                box.querySelectorAll("button").forEach(b => b.setAttribute("aria-checked", Number(b.textContent) === current));
-                document.getElementById("memoryHint").textContent = t("numberMemoryHint").replace("{{n}}", current);
-            };
-            for (let n = 1; n <= 9; n++) {
-                let button = document.createElement("button");
-                button.type = "button";
-                button.setAttribute("role", "radio");
-                button.textContent = n;
-                button.addEventListener("click", _ => {
-                    current = n;
-                    try { localStorage.setItem("numberMemoryIndex", n); } catch (e) { }
-                    render();
-                    showToast("✓ " + t("savedShort"));
-                });
-                box.append(button);
-            }
-            render();
+            let current = String(Number(localStorage.getItem("numberMemoryIndex")) || 3);
+            let hint = _ => document.getElementById("memoryHint").textContent = t("numberMemoryHint").replace("{{n}}", current);
+            digitPicker(document.getElementById("memoryIndex"), _ => digits, current, n => {
+                current = n;
+                try { localStorage.setItem("numberMemoryIndex", n); } catch (e) { }
+                hint();
+                showToast("✓ " + t("savedShort"));
+            });
+            hint();
         }
 
         // ---------- calculator look ----------

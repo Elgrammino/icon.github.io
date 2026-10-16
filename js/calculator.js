@@ -252,7 +252,29 @@ function feedback(isMagic) {
         } else {
             navigator.vibrate(1);
         }
+    } else if (isMagic && !isClientMode()) {
+        iosHaptic();
     }
+}
+
+// Safari on iPhone has no navigator.vibrate, but toggling an iOS switch (<input type="checkbox" switch>, iOS 18+)
+// gives the system haptic tick, also when the click comes from code. The switch is hidden and never shown.
+// Off in Low Power Mode or with System Haptics turned off; elsewhere the click just does nothing
+let hapticLabel;
+function iosHaptic() {
+    try {
+        if (!hapticLabel) {
+            let input = document.createElement("input");
+            input.type = "checkbox";
+            input.setAttribute("switch", "");
+            hapticLabel = document.createElement("label");
+            hapticLabel.setAttribute("aria-hidden", "true");
+            hapticLabel.style.display = "none";
+            hapticLabel.append(input);
+            document.head.append(hapticLabel);
+        }
+        hapticLabel.click();
+    } catch (e) { }
 }
 
 function doFakeTouchButton(id) {
