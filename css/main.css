@@ -686,6 +686,11 @@ body {
     font-family: var(--font);
 }
 
+/* "* { touch-action: none }" would stop the list scrolling when the finger starts on a row */
+.historyList * {
+    touch-action: pan-y;
+}
+
 .historyList h2 {
     position: relative;
     margin: 1.85rem 0 0;

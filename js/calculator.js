@@ -831,6 +831,20 @@ const historyConfirmEl = document.getElementById("historyConfirm");
 let historyCloseTimer;
 // editing: rows chosen with the circles (indexes in the saved list)
 let historySelection = new Set();
+// a finger that moved more than 10 px or scrolled the list does not pick a row
+let historyTouchMoved = false;
+let historyTouchStart = null;
+historyListEl.addEventListener("pointerdown", e => {
+    historyTouchMoved = false;
+    historyTouchStart = { x: e.clientX, y: e.clientY };
+});
+historyListEl.addEventListener("pointermove", e => {
+    if (historyTouchStart && Math.hypot(e.clientX - historyTouchStart.x, e.clientY - historyTouchStart.y) > 10) {
+        historyTouchMoved = true;
+    }
+});
+historyListEl.addEventListener("pointercancel", _ => historyTouchMoved = true);
+historyListEl.addEventListener("scroll", _ => historyTouchMoved = true, { passive: true });
 
 function loadHistory() {
     try {
@@ -901,8 +915,11 @@ function renderHistory() {
         row.innerHTML = '<div class="historySelect"></div><div class="historyText"><div class="historyExpression"></div><div class="historyResult"></div></div>';
         row.querySelector(".historyExpression").textContent = entry.e;
         row.querySelector(".historyResult").textContent = formatValue(entry.r);
-        // pointerup instead of click (ontouchend cancels clicks on iOS); scrolling the list cancels the pointer
+        // pointerup instead of click (ontouchend cancels clicks on iOS); a swipe or a scroll is not a tap
         row.addEventListener("pointerup", _ => {
+            if (historyTouchMoved) {
+                return;
+            }
             if (historyListEl.classList.contains("editing")) {
                 historySelection.has(index) ? historySelection.delete(index) : historySelection.add(index);
                 row.classList.toggle("selected", historySelection.has(index));
