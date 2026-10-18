@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тест вибрации</title>
+<style>
+    body { margin: 0; padding: 16px; background: #000; color: #fff; font: 17px -apple-system, system-ui, sans-serif; }
+    h1 { font-size: 22px; margin: 8px 0 4px; }
+    p { color: #aaa; font-size: 14px; margin: 0 0 16px; }
+    button { display: block; width: 100%; margin: 0 0 12px; padding: 16px; border: 0; border-radius: 14px;
+        background: #ff9f0a; color: #000; font: 600 17px -apple-system, system-ui, sans-serif; text-align: left; }
+    button span { display: block; font-weight: 400; font-size: 13px; opacity: .7; margin-top: 4px; }
+    #log { color: #8f8; font-size: 13px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>Повтор щелчка</h1>
+<p>Нажми каждую кнопку и запиши, сколько щелчков почувствовал. Энергосбережение выключено, тактильная отдача в настройках включена.</p>
+
+<button data-mode="sync" data-n="10">1. 10 раз сразу<span>всё внутри одного нажатия, без пауз</span></button>
+<button data-mode="timer" data-n="10" data-gap="40">2. 10 раз через 40 мс</button>
+<button data-mode="timer" data-n="10" data-gap="70">3. 10 раз через 70 мс</button>
+<button data-mode="timer" data-n="10" data-gap="100">4. 10 раз через 100 мс</button>
+<button data-mode="timer" data-n="6" data-gap="150">5. 6 раз через 150 мс</button>
+<button data-mode="raf" data-n="10">6. 10 раз по кадрам<span>каждый кадр экрана (~16 мс)</span></button>
+<button data-mode="multi" data-n="10" data-gap="70">7. 10 разных переключателей через 70 мс</button>
+
+<div id="log"></div>
+
+<script>
+// each switch is a hidden <input type="checkbox" switch> inside a label, as in iosHaptic() of calculator.js
+function makeSwitch() {
+    let input = document.createElement("input");
+    input.type = "checkbox";
+    input.setAttribute("switch", "");
+    let label = document.createElement("label");
+    label.setAttribute("aria-hidden", "true");
+    label.style.display = "none";
+    label.append(input);
+    document.head.append(label);
+    return label;
+}
+const main = makeSwitch();
+const many = Array.from({ length: 10 }, makeSwitch);
+const log = document.getElementById("log");
+
+for (let button of document.querySelectorAll("button")) {
+    button.addEventListener("click", _ => {
+        let { mode, n, gap } = button.dataset;
+        n = +n; gap = +gap;
+        let start = performance.now();
+        let done = 0;
+        let tick = label => { (label || main).click(); done++; };
+        if (mode === "sync") {
+            for (let i = 0; i < n; i++) tick();
+        } else if (mode === "timer") {
+            for (let i = 0; i < n; i++) setTimeout(tick, i * gap);
+        } else if (mode === "raf") {
+            let step = _ => { tick(); if (done < n) requestAnimationFrame(step); };
+            step();
+        } else if (mode === "multi") {
+            for (let i = 0; i < n; i++) setTimeout(_ => tick(many[i]), i * gap);
+        }
+        setTimeout(_ => log.textContent = button.firstChild.textContent.trim() + ": вызвано " + done + " за " + Math.round(performance.now() - start) + " мс\n" + log.textContent, n * (gap || 20) + 100);
+    });
+}
+</script>
+</body>
+</html>
