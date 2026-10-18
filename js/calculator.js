@@ -265,11 +265,21 @@ function feedback(isMagic) {
 // gives the system haptic tick. Since iOS 26.5 only from inside a tap (click event): not from a timer, pointerdown
 // or pointerup, and iOS counts no tap after a hold of ~1.5 s or more. So a magic hold (1 s) only asks for the tick,
 // and the click that follows the release plays it (flushHaptic on every key).
-// Off in Low Power Mode or with System Haptics turned off; elsewhere the click just does nothing
+// Off in Low Power Mode or with System Haptics turned off; elsewhere the click just does nothing.
+// One tick is weak, so the magic plays a burst: one tick per screen frame (~16 ms), 20 in all (~0.3 s).
+// Checked on iPhone: a burst works while it stays within ~1 s of the tap
+const hapticBurst = 20;
 let hapticRequest = 0;
 function flushHaptic() {
     if (hapticRequest && Date.now() - hapticRequest < 3000) {
-        iosHaptic();
+        let count = 0;
+        let tick = _ => {
+            iosHaptic();
+            if (++count < hapticBurst) {
+                requestAnimationFrame(tick);
+            }
+        };
+        tick();
     }
     hapticRequest = 0;
 }
