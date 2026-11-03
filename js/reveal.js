@@ -172,7 +172,7 @@ const reveal = (_ => {
         return {
             sign,
             day: i18next.t("weekdayOn", { returnObjects: true })[new Date(year, month - 1, day).getDay()],
-            date: p(day) + "." + p(month) + "." + year,
+            date: p(next.getDate()) + "." + p(next.getMonth() + 1) + "." + next.getFullYear(),
             days: days + " " + (isRu ? plural(days, ["день", "дня", "дней"]) : days === 1 ? "day" : "days"),
             age: String(age)
         };
