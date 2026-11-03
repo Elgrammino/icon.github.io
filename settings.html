@@ -468,6 +468,9 @@
         .editor-tools {
             display: grid;
             gap: 6px;
+            max-height: 45dvh;
+            overflow-y: auto;
+            touch-action: pan-y;
             padding: 10px max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
             color: var(--muted);
             font-size: 13px;
@@ -486,7 +489,18 @@
 
         .editor-tools input {
             width: 100%;
+            min-height: 32px;
             accent-color: var(--accent);
+        }
+
+        .editor-tools .small-button {
+            min-height: 44px;
+        }
+
+        .editor-tools p {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.4;
         }
 
         .glass-button {
@@ -640,6 +654,10 @@
             </div>
             <label><span id="editorFontLabel"></span><input type="range" id="editorFont" min="0.4" max="1.6" step="0.05" value="1"></label>
             <label><span id="editorOpacityLabel"></span><input type="range" id="editorOpacity" min="0.2" max="1" step="0.05" value="0.9"></label>
+            <label><span id="editorSoftnessLabel"></span><input type="range" id="editorSoftness" min="0" max="2" step="0.05" value="0.55"></label>
+            <label><span id="editorTextureLabel"></span><input type="range" id="editorTexture" min="0" max="1" step="0.05" value="0.35"></label>
+            <button type="button" class="small-button" id="editorCompare" aria-pressed="false"></button>
+            <p id="editorOfflineHint"></p>
         </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
@@ -885,7 +903,8 @@
             const ids = {
                 revealCorners: "revealCorners", revealRemove: "revealRemove", revealHoursLabel: "revealHours",
                 revealTextLabel: "revealText", revealExampleLabel: "revealExample", revealNoPhoto: "revealNoPhoto",
-                editorCancel: "revealCancel", editorDone: "revealDone", editorHint: "revealCornersHint", editorFontLabel: "revealFontSize", editorOpacityLabel: "revealOpacity"
+                editorCancel: "revealCancel", editorDone: "revealDone", editorHint: "revealCornersHint", editorFontLabel: "revealFontSize", editorOpacityLabel: "revealOpacity",
+                editorSoftnessLabel: "revealSoftness", editorTextureLabel: "revealTexture", editorCompare: "revealCompareBefore", editorOfflineHint: "revealOfflineHint"
             };
             Object.entries(ids).forEach(([id, key]) => document.getElementById(id).textContent = t(key));
 
@@ -981,10 +1000,18 @@
                 editor.hidden = false;
                 let corners = meta.corners.map(c => c.slice());
                 let opacity = document.getElementById("editorOpacity");
+                let softness = document.getElementById("editorSoftness");
+                let texture = document.getElementById("editorTexture");
+                let compare = document.getElementById("editorCompare");
+                let plain = false;
+                compare.setAttribute("aria-pressed", "false");
+                compare.textContent = t("revealCompareBefore");
                 let faces = document.querySelectorAll("#editorFontFace button");
                 let style = reveal.getStyle(meta);
                 font.value = style.fontScale;
                 opacity.value = style.opacity;
+                softness.value = style.softness;
+                texture.value = style.texture;
                 let face = style.font;
                 let renderFaces = _ => faces.forEach(b => b.setAttribute("aria-checked", b.dataset.font === face));
                 renderFaces();
@@ -1003,7 +1030,8 @@
                     frame = 0;
                     g.drawImage(image, 0, 0, canvas.width, canvas.height);
                     reveal.drawOnSheet(g, text, reveal.orderCorners(corners).map(([x, y]) => [x * canvas.width, y * canvas.height]),
-                        { fontScale: Number(font.value), opacity: Number(opacity.value), font: face });
+                        { fontScale: Number(font.value), opacity: Number(opacity.value), font: face,
+                            softness: Number(softness.value), texture: Number(texture.value) }, { plain });
                 };
                 let redraw = _ => frame = frame || requestAnimationFrame(draw);
                 draw();
@@ -1078,6 +1106,14 @@
                 });
                 font.oninput = redraw;
                 opacity.oninput = redraw;
+                softness.oninput = redraw;
+                texture.oninput = redraw;
+                compare.onclick = _ => {
+                    plain = !plain;
+                    compare.setAttribute("aria-pressed", String(plain));
+                    compare.textContent = t(plain ? "revealCompareAfter" : "revealCompareBefore");
+                    redraw();
+                };
                 faces.forEach(b => b.onclick = _ => {
                     face = b.dataset.font;
                     renderFaces();
@@ -1085,10 +1121,12 @@
                 });
                 let close = isSave => {
                     if (isSave) {
-                        reveal.setMeta(Object.assign(reveal.getMeta(), { corners, fontScale: Number(font.value), opacity: Number(opacity.value), font: face }));
+                        reveal.setMeta(Object.assign(reveal.getMeta(), { corners, fontScale: Number(font.value), opacity: Number(opacity.value), font: face,
+                            softness: Number(softness.value), texture: Number(texture.value) }));
                         showToast("✓ " + t("savedShort"));
                     }
                     editor.hidden = true;
+                    cancelAnimationFrame(frame);
                 };
                 document.getElementById("editorDone").onclick = _ => close(true);
                 document.getElementById("editorCancel").onclick = _ => close(false);

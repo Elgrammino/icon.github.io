@@ -9,7 +9,6 @@
 
 const reveal = (_ => {
     const maxPixels = 12500000;       // iPhone canvas limit is ~16.7 MP; 48 MP photos are scaled down
-    const ink = [24, 24, 26];
     const fonts = {
         unbounded: '"RevealUnbounded", "Unbounded", sans-serif',
         times: '"Times New Roman", Times, Georgia, serif'
@@ -31,7 +30,9 @@ const reveal = (_ => {
         return {
             fontScale: meta.fontScale || 1,
             opacity: meta.opacity >= 0.1 && meta.opacity <= 1 ? meta.opacity : 0.9,
-            font: fonts[meta.font] ? meta.font : "unbounded"
+            font: fonts[meta.font] ? meta.font : "unbounded",
+            softness: Number.isFinite(meta.softness) ? Math.max(0, Math.min(2, meta.softness)) : 0.55,
+            texture: Number.isFinite(meta.texture) ? Math.max(0, Math.min(1, meta.texture)) : 0.35
         };
     }
 
@@ -115,6 +116,7 @@ const reveal = (_ => {
                     setMeta({
                         width: canvas.width, height: canvas.height, fontScale: old ? old.fontScale : 1,
                         opacity: old ? old.opacity : 0.9, font: old ? old.font : "unbounded",
+                        softness: getStyle(old).softness, texture: getStyle(old).texture,
                         corners: [[0.2, 0.25], [0.8, 0.25], [0.8, 0.75], [0.2, 0.75]]
                     });
                 }));
@@ -280,13 +282,52 @@ const reveal = (_ => {
         return h;
     }
 
-    // draws the sheet text onto g in perspective; corners in pixels of g's canvas
-    function drawOnSheet(g, text, corners, style) {
+    // A separable box filter keeps memory and work bounded on large iPhone photos.
+    // Fractional strength allows subpixel softness without relying on Canvas filter support in Safari.
+    function softenMask(mask, width, height, sigma) {
+        if (sigma <= 0) return mask;
+        let radius = Math.max(1, Math.min(8, Math.round(sigma * 1.7)));
+        let mix = Math.min(1, sigma / 0.65);
+        let temp = new Uint8ClampedArray(mask.length);
+        let out = new Uint8ClampedArray(mask.length);
+        let size = radius * 2 + 1;
+        for (let y = 0; y < height; y++) {
+            let row = y * width, sum = 0;
+            for (let x = -radius; x <= radius; x++) sum += mask[row + Math.max(0, Math.min(width - 1, x))];
+            for (let x = 0; x < width; x++) {
+                temp[row + x] = sum / size;
+                sum += mask[row + Math.min(width - 1, x + radius + 1)] - mask[row + Math.max(0, x - radius)];
+            }
+        }
+        for (let x = 0; x < width; x++) {
+            let sum = 0;
+            for (let y = -radius; y <= radius; y++) sum += temp[Math.max(0, Math.min(height - 1, y)) * width + x];
+            for (let y = 0; y < height; y++) {
+                let at = y * width + x;
+                out[at] = mask[at] * (1 - mix) + sum / size * mix;
+                sum += temp[Math.min(height - 1, y + radius + 1) * width + x] - temp[Math.max(0, y - radius) * width + x];
+            }
+        }
+        return out;
+    }
+
+    // Stable in photo coordinates: moving a corner or generating another date does not shuffle the grain.
+    function inkNoise(x, y) {
+        let n = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263);
+        n = Math.imul(n ^ (n >>> 13), 1274126177);
+        return ((n ^ (n >>> 16)) >>> 0) / 4294967295 - 0.5;
+    }
+
+    // Draws text onto the actual photo, not a flat-color overlay. Geometry, ink, local paper color,
+    // high-frequency paper detail and photo-space softness share one renderer in preview and export.
+    // options.plain is the old rendering for the editor's before/after comparison only.
+    function drawOnSheet(g, text, corners, style, options = {}) {
         style = getStyle(style);
         let [tl, tr, br, bl] = corners;
         let dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
         let width = (dist(tl, tr) + dist(bl, br)) / 2;
         let height = (dist(tl, bl) + dist(tr, br)) / 2;
+        if (!Number.isFinite(width + height) || width < 2 || height < 2) return;
         // the text is drawn at most ~1.5× the sheet's size on screen and sampled from there
         let k = Math.min(1.5, 2400 / Math.max(width, height));
         let source = textCanvas(text, width * k, height * k, style.fontScale, fonts[style.font]);
@@ -294,15 +335,21 @@ const reveal = (_ => {
         let sw = source.width, sh = source.height;
         let alpha = source.getContext("2d").getImageData(0, 0, sw, sh).data;
         let h = homography(corners, [[0, 0], [sw, 0], [sw, sh], [0, sh]]);
-        let x0 = Math.max(0, Math.floor(Math.min(tl[0], tr[0], br[0], bl[0])));
-        let y0 = Math.max(0, Math.floor(Math.min(tl[1], tr[1], br[1], bl[1])));
-        let x1 = Math.min(g.canvas.width, Math.ceil(Math.max(tl[0], tr[0], br[0], bl[0])));
-        let y1 = Math.min(g.canvas.height, Math.ceil(Math.max(tl[1], tr[1], br[1], bl[1])));
+        if (!h.every(Number.isFinite)) return;
+        let photoScale = Math.max(g.canvas.width, g.canvas.height) / 1600;
+        let softness = options.plain ? 0 : style.softness * photoScale;
+        let pad = Math.ceil(softness * 2) + 2;
+        let x0 = Math.max(0, Math.floor(Math.min(tl[0], tr[0], br[0], bl[0])) - pad);
+        let y0 = Math.max(0, Math.floor(Math.min(tl[1], tr[1], br[1], bl[1])) - pad);
+        let x1 = Math.min(g.canvas.width, Math.ceil(Math.max(tl[0], tr[0], br[0], bl[0])) + pad);
+        let y1 = Math.min(g.canvas.height, Math.ceil(Math.max(tl[1], tr[1], br[1], bl[1])) + pad);
         if (x1 <= x0 || y1 <= y0) {
             return;
         }
-        let out = g.createImageData(x1 - x0, y1 - y0);
+        let rw = x1 - x0, rh = y1 - y0;
+        let out = g.getImageData(x0, y0, rw, rh);
         let data = out.data;
+        let mask = new Uint8ClampedArray(rw * rh);
         let i = 0;
         for (let y = y0; y < y1; y++) {
             let py = y + 0.5;
@@ -311,7 +358,7 @@ const reveal = (_ => {
                 let w = h[6] * px + h[7] * py + 1;
                 let u = (h[0] * px + h[1] * py + h[2]) / w - 0.5;
                 let v = (h[3] * px + h[4] * py + h[5]) / w - 0.5;
-                if (u < 0 || v < 0 || u >= sw - 1 || v >= sh - 1) {
+                if (!Number.isFinite(u + v) || u < 0 || v < 0 || u >= sw - 1 || v >= sh - 1) {
                     continue;
                 }
                 // bilinear sample of the text's alpha
@@ -319,19 +366,43 @@ const reveal = (_ => {
                 let s = (vy * sw + ux) * 4 + 3;
                 let a = (alpha[s] * (1 - fx) + alpha[s + 4] * fx) * (1 - fy)
                     + (alpha[s + sw * 4] * (1 - fx) + alpha[s + sw * 4 + 4] * fx) * fy;
-                if (a > 0) {
-                    data[i] = ink[0];
-                    data[i + 1] = ink[1];
-                    data[i + 2] = ink[2];
-                    data[i + 3] = a * opacity;
+                mask[i / 4] = a;
+            }
+        }
+        mask = softenMask(mask, rw, rh, softness);
+        // Downsampling estimates broad illumination; detail is taken from the original photo,
+        // rather than treating brightness as a height map or inventing folds.
+        let field = document.createElement("canvas");
+        let fieldScale = Math.min(1, 128 / Math.max(rw, rh));
+        field.width = Math.max(2, Math.round(rw * fieldScale));
+        field.height = Math.max(2, Math.round(rh * fieldScale));
+        let fg = field.getContext("2d");
+        fg.drawImage(g.canvas, x0, y0, rw, rh, 0, 0, field.width, field.height);
+        let light = fg.getImageData(0, 0, field.width, field.height).data;
+        for (let y = 0, at = 0; y < rh; y++) {
+            let fy = y / Math.max(1, rh - 1) * (field.height - 1);
+            let vy = Math.min(field.height - 2, Math.floor(fy)), dy = fy - vy;
+            for (let x = 0; x < rw; x++, at++) {
+                if (!mask[at]) continue;
+                let a = mask[at] / 255 * opacity, pixel = at * 4;
+                let fx = x / Math.max(1, rw - 1) * (field.width - 1);
+                let ux = Math.min(field.width - 2, Math.floor(fx)), dx = fx - ux;
+                let sample = (vy * field.width + ux) * 4;
+                let noise = inkNoise((x + x0) / photoScale, (y + y0) / photoScale);
+                // Tiny density variation, not visible scratches or artificial aging.
+                if (!options.plain) a *= 1 - style.texture * (noise + 0.5) * 0.045;
+                for (let c = 0; c < 3; c++) {
+                    let paper = (light[sample + c] * (1 - dx) + light[sample + 4 + c] * dx) * (1 - dy)
+                        + (light[sample + field.width * 4 + c] * (1 - dx) + light[sample + field.width * 4 + 4 + c] * dx) * dy;
+                    let detail = Math.max(-10, Math.min(10, data[pixel + c] - paper));
+                    let ink = options.plain ? (c === 2 ? 26 : 24)
+                        : paper * 0.12 + detail * style.texture * 0.65 + noise * style.texture * 1.5;
+                    data[pixel + c] = data[pixel + c] * (1 - a) + Math.max(0, ink) * a;
                 }
             }
         }
-        let layer = document.createElement("canvas");
-        layer.width = out.width;
-        layer.height = out.height;
-        layer.getContext("2d").putImageData(out, 0, 0);
-        g.drawImage(layer, x0, y0);
+        g.putImageData(out, x0, y0);
+        field.width = field.height = 1;
     }
 
     function cornersInPixels(meta, width, height) {
